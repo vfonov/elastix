@@ -107,8 +107,9 @@ target_link_libraries( elxCore
 )
 
 #---------------------------------------------------------------------
-# Define the mevis dcm tiff lib to which we should link.
-set( mevisdcmtifflib mevisdcmtiff )
+IF(ELASTIX_USE_MEVISDICOMTIFF) 
+  SET( mevisdcmtifflib mevisdcmtiff )
+ENDIF(ELASTIX_USE_MEVISDICOMTIFF) 
 
 #---------------------------------------------------------------------
 # Create the elastix executable or library.
@@ -185,7 +186,6 @@ target_link_libraries( elastix
   xoutlib
   elxCommon
   elxCore
-  ${mevisdcmtifflib}
   ${AllComponentLibs}
   ${ITK_LIBRARIES}
 )
@@ -198,11 +198,11 @@ target_link_libraries( transformix
   xoutlib
   elxCommon
   elxCore
-  ${mevisdcmtifflib}
   ${AllComponentLibs}
   ${ITK_LIBRARIES}
 )
 
+<<<<<<< HEAD
 if( MSVC )
   # NOTE: that linker /INCREMENTAL:NO flag makes it impossible to use
   # Debug breakpoints in Visual Studio 10.0. It is probably the Visual Studio 10.0 bug.
@@ -214,6 +214,18 @@ if( MSVC )
   endif()
 endif()
 
+||||||| merged common ancestors
+=======
+IF(ELASTIX_USE_MEVISDICOMTIFF) 
+  TARGET_LINK_LIBRARIES( elastix
+    ${mevisdcmtifflib} )
+  
+  TARGET_LINK_LIBRARIES( transformix
+    ${mevisdcmtifflib} )
+ENDIF(ELASTIX_USE_MEVISDICOMTIFF) 
+
+
+>>>>>>> Made MEVIS tiff conditional
 #---------------------------------------------------------------------
 # Define the install directory for elastix and transformix.
 

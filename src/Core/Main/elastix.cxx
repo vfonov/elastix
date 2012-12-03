@@ -65,9 +65,11 @@ main( int argc, char ** argv )
   typedef std::queue< ArgPairType >             ParameterFileListType;
   typedef ParameterFileListType::value_type     ParameterFileListEntryType;
 
+#ifdef ELASTIX_USE_MEVIS  
   /** Support Mevis Dicom Tiff (if selected in cmake) */
   RegisterMevisDicomTiff();
-
+#endif //ELASTIX_USE_MEVIS  
+  
   /** Some declarations and initialisations. */
   ElastixMainVectorType elastices;
 

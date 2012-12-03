@@ -14,7 +14,9 @@
 #ifndef __elastix_h
 #define __elastix_h
 
+#ifdef ELASTIX_USE_MEVIS  
 #include "itkUseMevisDicomTiff.h"
+#endif //ELASTIX_USE_MEVIS  
 
 #include "elxElastixMain.h"
 #include <iostream>

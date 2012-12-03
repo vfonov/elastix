@@ -157,10 +157,13 @@ set( elxCommon_INCLUDE_DIRECTORIES
   ${elastix_SOURCE_DIR}/Common/ParameterFileParser
   ${elastix_SOURCE_DIR}/Common/Transforms
   ${elastix_SOURCE_DIR}/Common/xout
-  ${elastix_SOURCE_DIR}/Common/MevisDicomTiff
 )
 
-set( elxCore_INCLUDE_DIRECTORIES
+IF(ELASTIX_USE_MEVISDICOMTIFF) 
+  SET( elxCommon_INCLUDE_DIRECTORIES ${elxCommon_INCLUDE_DIRECTORIES}   ${elastix_SOURCE_DIR}/Common/MevisDicomTiff)
+ENDIF(ELASTIX_USE_MEVISDICOMTIFF)
+
+SET( elxCore_INCLUDE_DIRECTORIES
   ${elastix_SOURCE_DIR}/Core
   ${elastix_SOURCE_DIR}/Core/Install
   ${elastix_SOURCE_DIR}/Core/Kernel
