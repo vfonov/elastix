@@ -221,7 +221,6 @@ IF(ELASTIX_USE_MEVISDICOMTIFF)
     ${mevisdcmtifflib} )
 ENDIF(ELASTIX_USE_MEVISDICOMTIFF) 
 
-
 #---------------------------------------------------------------------
 # Define the install directory for elastix and transformix.
 
