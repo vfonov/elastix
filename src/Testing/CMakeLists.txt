@@ -18,8 +18,8 @@ endif()
 # Add macro to decide if mevisdicomtiff should be tested
 if( ELASTIX_USE_MEVISDICOMTIFF )
   add_definitions( -D_ELASTIX_USE_MEVISDICOMTIFF )
+  set( mevisdcmtifflib mevisdcmtiff )
 endif()
-set( mevisdcmtifflib mevisdcmtiff )
 
 
 #---------------------------------------------------------------------
@@ -346,7 +346,9 @@ elx_add_test( BSplineSODerivativeKernelFunctionTest )
 elx_add_test( BSplineInterpolationWeightFunctionTest )
 elx_add_test( BSplineInterpolationDerivativeWeightFunctionTest )
 elx_add_test( BSplineInterpolationSODerivativeWeightFunctionTest )
+IF(ELASTIX_USE_MEVISDICOMTIFF)
 elx_add_test( MevisDicomTiffImageIOTest )
+ENDIF(ELASTIX_USE_MEVISDICOMTIFF)
 elx_add_test( ThinPlateSplineTransformPerformanceTest
   ${elastix_SOURCE_DIR}/Testing/parameters_TPSTransformTest.txt
   ${elastix_BINARY_DIR}/Testing )
