@@ -202,7 +202,6 @@ target_link_libraries( transformix
   ${ITK_LIBRARIES}
 )
 
-<<<<<<< HEAD
 if( MSVC )
   # NOTE: that linker /INCREMENTAL:NO flag makes it impossible to use
   # Debug breakpoints in Visual Studio 10.0. It is probably the Visual Studio 10.0 bug.
@@ -214,8 +213,6 @@ if( MSVC )
   endif()
 endif()
 
-||||||| merged common ancestors
-=======
 IF(ELASTIX_USE_MEVISDICOMTIFF) 
   TARGET_LINK_LIBRARIES( elastix
     ${mevisdcmtifflib} )
@@ -225,7 +222,6 @@ IF(ELASTIX_USE_MEVISDICOMTIFF)
 ENDIF(ELASTIX_USE_MEVISDICOMTIFF) 
 
 
->>>>>>> Made MEVIS tiff conditional
 #---------------------------------------------------------------------
 # Define the install directory for elastix and transformix.
 
