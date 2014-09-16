@@ -83,20 +83,22 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
   }
 
   /** Some initialization. */
-  const NumberOfParametersType nnzji = this->m_AdvancedTransform->GetNumberOfNonZeroJacobianIndices();
-  const AccumulateType         zero  = NumericTraits< AccumulateType >::Zero;
+  const AccumulateType      zero1 = NumericTraits< AccumulateType >::Zero;
+  const DerivativeValueType zero2 = NumericTraits< DerivativeValueType >::Zero;
   for( ThreadIdType i = 0; i < this->m_NumberOfThreads; ++i )
   {
     this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_NumberOfPixelsCounted = NumericTraits< SizeValueType >::Zero;
-    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sff                   = zero;
-    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Smm                   = zero;
-    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sfm                   = zero;
-    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sf                    = zero;
-    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sm                    = zero;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sff                   = zero1;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Smm                   = zero1;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sfm                   = zero1;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sf                    = zero1;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sm                    = zero1;
     this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeF.SetSize( this->GetNumberOfParameters() );
     this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeM.SetSize( this->GetNumberOfParameters() );
     this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Differential.SetSize( this->GetNumberOfParameters() );
-    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_TransformJacobian.SetSize( FixedImageDimension, nnzji );
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeF.Fill( zero2 );
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeM.Fill( zero2 );
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Differential.Fill( zero2 );
   }
 
 } // end InitializeThreadingParameters()
@@ -326,7 +328,6 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
   itkDebugMacro( << "GetValueAndDerivative( " << parameters << " ) " );
 
   typedef typename DerivativeType::ValueType        DerivativeValueType;
-  typedef typename TransformJacobianType::ValueType TransformJacobianValueType;
 
   /** Initialize some variables. */
   this->m_NumberOfPixelsCounted = 0;
@@ -507,9 +508,6 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
    */
   this->BeforeThreadedGetValueAndDerivative( parameters );
 
-  /** Initialize some threading related parameters. */
-  this->InitializeThreadingParameters();
-
   /** launch multithreading metric */
   this->LaunchGetValueAndDerivativeThreaderCallback();
 
@@ -533,19 +531,14 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
   NonZeroJacobianIndicesType   nzji  = NonZeroJacobianIndicesType( nnzji );
   DerivativeType               imageJacobian( nzji.size() );
 
-  /** Get a handle to a pre-allocated transform Jacobian. */
-  TransformJacobianType & jacobian
-    = this->m_CorrelationGetValueAndDerivativePerThreadVariables[ threadId ].st_TransformJacobian;
-
   /** Get handles to the pre-allocated derivatives for the current thread.
-   * Also initialize per thread, instead of sequentially in InitializeThreadingParameters().
+   * The initialization is performed at the beginning of each resolution in
+   * InitializeThreadingParameters(), and at the end of each iteration in
+   * AfterThreadedGetValueAndDerivative() and the accumulate functions.
    */
   DerivativeType & derivativeF  = this->m_CorrelationGetValueAndDerivativePerThreadVariables[ threadId ].st_DerivativeF;
   DerivativeType & derivativeM  = this->m_CorrelationGetValueAndDerivativePerThreadVariables[ threadId ].st_DerivativeM;
   DerivativeType & differential = this->m_CorrelationGetValueAndDerivativePerThreadVariables[ threadId ].st_Differential;
-  derivativeF.Fill(  NumericTraits< DerivativeValueType >::Zero ); // seems needed unfortunately
-  derivativeM.Fill(  NumericTraits< DerivativeValueType >::Zero ); // seems needed unfortunately
-  differential.Fill( NumericTraits< DerivativeValueType >::Zero ); // seems needed unfortunately
 
   /** Get a handle to the sample container. */
   ImageSampleContainerPointer sampleContainer     = this->GetImageSampler()->GetOutput();
@@ -612,12 +605,18 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
       const RealType & fixedImageValue
         = static_cast< RealType >( ( *threader_fiter ).Value().m_ImageValue );
 
+#if 0
       /** Get the TransformJacobian dT/dmu. */
       this->EvaluateTransformJacobian( fixedPoint, jacobian, nzji );
 
       /** Compute the inner products (dM/dx)^T (dT/dmu). */
       this->EvaluateTransformJacobianInnerProduct(
         jacobian, movingImageDerivative, imageJacobian );
+#else
+      /** Compute the inner product of the transform Jacobian dT/dmu and the moving image gradient dM/dx. */
+      this->m_AdvancedTransform->EvaluateJacobianWithImageGradientProduct(
+        fixedPoint, movingImageDerivative, imageJacobian, nzji );
+#endif
 
       /** Update some sums needed to calculate the value of NC. */
       sff += fixedImageValue  * fixedImageValue;
@@ -663,6 +662,9 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
   {
     this->m_NumberOfPixelsCounted
       += this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_NumberOfPixelsCounted;
+
+    /** Reset this variable for the next iteration. */
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_NumberOfPixelsCounted = 0;
   }
 
   /** Check if enough samples were valid. */
@@ -671,6 +673,7 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
     sampleContainer->Size(), this->m_NumberOfPixelsCounted );
 
   /** Accumulate values. */
+  const AccumulateType zero = NumericTraits< AccumulateType >::Zero;
   AccumulateType sff = this->m_CorrelationGetValueAndDerivativePerThreadVariables[ 0 ].st_Sff;
   AccumulateType smm = this->m_CorrelationGetValueAndDerivativePerThreadVariables[ 0 ].st_Smm;
   AccumulateType sfm = this->m_CorrelationGetValueAndDerivativePerThreadVariables[ 0 ].st_Sfm;
@@ -683,6 +686,13 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
     sfm += this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sfm;
     sf  += this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sf;
     sm  += this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sm;
+
+    /** Reset these variables for the next iteration. */
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sff = zero;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Smm = zero;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sfm = zero;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sf  = zero;
+    this->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Sm  = zero;
   }
 
   /** If SubtractMean, then subtract things from sff, smm and sfm. */
@@ -754,10 +764,8 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
     temp->st_InvertedDenominator = 1.0 / denom;
     temp->st_DerivativePointer   = derivative.begin();
 
-    typename ThreaderType::Pointer local_threader = ThreaderType::New();
-    local_threader->SetNumberOfThreads( this->m_NumberOfThreads );
-    local_threader->SetSingleMethod( AccumulateDerivativesThreaderCallback, temp );
-    local_threader->SingleMethodExecute();
+    this->m_Threader->SetSingleMethod( AccumulateDerivativesThreaderCallback, temp );
+    this->m_Threader->SingleMethodExecute();
 
     delete temp;
   }
@@ -826,23 +834,25 @@ AdvancedNormalizedCorrelationImageToImageMetric< TFixedImage, TMovingImage >
   const unsigned int numPar  = temp->st_Metric->GetNumberOfParameters();
   const unsigned int subSize = static_cast< unsigned int >(
     vcl_ceil( static_cast< double >( numPar ) / static_cast< double >( nrOfThreads ) ) );
-
   unsigned int jmin = threadId * subSize;
   unsigned int jmax = ( threadId + 1 ) * subSize;
   jmax = ( jmax > numPar ) ? numPar : jmax;
 
+  const DerivativeValueType zero = NumericTraits< DerivativeValueType >::Zero;
   DerivativeValueType derivativeF, derivativeM, differential;
   for( unsigned int j = jmin; j < jmax; ++j )
   {
-    derivativeF  = temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ 0 ].st_DerivativeF[ j ];
-    derivativeM  = temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ 0 ].st_DerivativeM[ j ];
-    differential = temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ 0 ].st_Differential[ j ];
-
-    for( ThreadIdType i = 1; i < nrOfThreads; ++i )
+    derivativeF = derivativeM = differential = zero;
+    for( ThreadIdType i = 0; i < nrOfThreads; ++i )
     {
       derivativeF  += temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeF[ j ];
       derivativeM  += temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeM[ j ];
       differential += temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Differential[ j ];
+
+      /** Reset these variables for the next iteration. */
+      temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeF[ j ] = zero;
+      temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeM[ j ] = zero;
+      temp->st_Metric->m_CorrelationGetValueAndDerivativePerThreadVariables[ i ].st_Differential[ j ] = zero;
     }
 
     if( subtractMean )

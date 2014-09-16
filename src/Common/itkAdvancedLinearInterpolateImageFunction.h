@@ -1,20 +1,16 @@
-/*=========================================================================
- *
- *  Copyright Insight Software Consortium
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0.txt
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- *=========================================================================*/
+/*======================================================================
+
+  This file is part of the elastix software.
+
+  Copyright (c) University Medical Center Utrecht. All rights reserved.
+  See src/CopyrightElastix.txt or http://elastix.isi.uu.nl/legal.php for
+  details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE. See the above copyright notices for more information.
+
+======================================================================*/
 #ifndef __itkAdvancedLinearInterpolateImageFunction_h
 #define __itkAdvancedLinearInterpolateImageFunction_h
 
@@ -38,6 +34,17 @@ namespace itk
  * Unlike the LinearInterpolateImageFunction, which implements a constant
  * boundary condition, this class implements a mirroring boundary condition,
  * which mimics the BSplineInterpolateImageFunction.
+ *
+ * Edge cases, i.e. points exactly on the right most edge of the image,
+ * need to be dealt with separately. In this implementation we subtract a
+ * small number from the continuous index and interpolate at that position.
+ * Alternatively, you would need to implement 7 different possibilities in
+ * 3D, e.g.:
+ *   x[0] is at end index           -> interpolate in x-y plane
+ *   x[0] and x[1] are at end index -> interpolate along z line
+ *   all are at end index           -> nearest neighbor interpolation
+ * We opt to subtract a small number from x, which is computationally efficient,
+ * gives cleaner code, and almost exactly the same interpolated value.
  *
  * \sa VectorAdvancedLinearInterpolateImageFunction
  *

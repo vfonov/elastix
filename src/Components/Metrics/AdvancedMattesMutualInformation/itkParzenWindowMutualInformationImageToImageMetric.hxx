@@ -178,7 +178,6 @@ ParzenWindowMutualInformationImageToImageMetric< TFixedImage, TMovingImage >
     JointPDFDerivativesType >                       JointPDFDerivativesIteratorType;
   typedef typename MarginalPDFType::const_iterator MarginalPDFIteratorType;
   typedef typename DerivativeType::iterator        DerivativeIteratorType;
-  typedef typename DerivativeType::const_iterator  DerivativeConstIteratorType;
 
   JointPDFIteratorType jointPDFit(
   this->m_JointPDF, this->m_JointPDF->GetLargestPossibleRegion() );
@@ -445,14 +444,12 @@ ParzenWindowMutualInformationImageToImageMetric< TFixedImage, TMovingImage >
   NonZeroJacobianIndicesType   nzji  = NonZeroJacobianIndicesType( nnzji );
   DerivativeType               imageJacobian( nzji.size() );
 
-  /** Get a handle to a pre-allocated transform Jacobian. */
-  TransformJacobianType & jacobian = this->m_GetValueAndDerivativePerThreadVariables[ threadId ].st_TransformJacobian;
-
   /** Get a handle to the pre-allocated derivative for the current thread.
-   * Also initialize per thread, instead of sequentially in InitializeThreadingParameters().
+   * The initialization is performed at the beginning of each resolution in
+   * InitializeThreadingParameters(), and at the end of each iteration in
+   * AfterThreadedGetValueAndDerivative() and the accumulate functions.
    */
   DerivativeType & derivative = this->m_GetValueAndDerivativePerThreadVariables[ threadId ].st_Derivative;
-  derivative.Fill( NumericTraits< DerivativeValueType >::Zero ); // needed?
 
   /** Declare and allocate arrays for Jacobian preconditioning. */
   DerivativeType jacobianPreconditioner, preconditioningDivisor;
@@ -517,21 +514,29 @@ ParzenWindowMutualInformationImageToImageMetric< TFixedImage, TMovingImage >
       RealType fixedImageValue = static_cast< RealType >( ( *fiter ).Value().m_ImageValue );
 
       /** Make sure the values fall within the histogram range. */
-      fixedImageValue = this->GetFixedImageLimiter()
-        ->Evaluate( fixedImageValue );
+      fixedImageValue = this->GetFixedImageLimiter()->Evaluate( fixedImageValue );
       movingImageValue = this->GetMovingImageLimiter()
         ->Evaluate( movingImageValue, movingImageDerivative );
 
-      /** Get the transform Jacobian dT/dmu. */
+#if 0
+      /** Get the TransformJacobian dT/dmu. */
       this->EvaluateTransformJacobian( fixedPoint, jacobian, nzji );
 
-      /** Compute the inner product (dM/dx)^T (dT/dmu). */
+      /** Compute the inner products (dM/dx)^T (dT/dmu). */
       this->EvaluateTransformJacobianInnerProduct(
         jacobian, movingImageDerivative, imageJacobian );
+#else
+      /** Compute the inner product of the transform Jacobian dT/dmu and the moving image gradient dM/dx. */
+      this->m_AdvancedTransform->EvaluateJacobianWithImageGradientProduct(
+        fixedPoint, movingImageDerivative, imageJacobian, nzji );
+#endif
 
       /** If desired, apply the technique introduced by Tustison. */
+      TransformJacobianType jacobian;
       if( this->GetUseJacobianPreconditioning() )
       {
+        this->EvaluateTransformJacobian( fixedPoint, jacobian, nzji );
+
         this->ComputeJacobianPreconditioner( jacobian, nzji,
           jacobianPreconditioner, preconditioningDivisor );
         DerivativeValueType * imjacit   = imageJacobian.begin();
@@ -558,7 +563,6 @@ ParzenWindowMutualInformationImageToImageMetric< TFixedImage, TMovingImage >
   /** If desired, apply the technique introduced by Tustison. */
   if( this->GetUseJacobianPreconditioning() )
   {
-    //DerivativeValueType * derivit = derivative.begin();
     DerivativeValueType * derivit = derivative.begin();
     DerivativeValueType * divisit = preconditioningDivisor.begin();
 
@@ -620,11 +624,9 @@ ParzenWindowMutualInformationImageToImageMetric< TFixedImage, TMovingImage >
     this->m_ThreaderMetricParameters.st_DerivativePointer   = derivative.begin();
     this->m_ThreaderMetricParameters.st_NormalizationFactor = 1.0;
 
-    typename ThreaderType::Pointer local_threader = ThreaderType::New();
-    local_threader->SetNumberOfThreads( this->m_NumberOfThreads );
-    local_threader->SetSingleMethod( this->AccumulateDerivativesThreaderCallback,
+    this->m_Threader->SetSingleMethod( this->AccumulateDerivativesThreaderCallback,
       const_cast< void * >( static_cast< const void * >( &this->m_ThreaderMetricParameters ) ) );
-    local_threader->SingleMethodExecute();
+    this->m_Threader->SingleMethodExecute();
   }
 
 } // end AfterThreadedComputeDerivativeLowMemory()
@@ -661,16 +663,13 @@ void
 ParzenWindowMutualInformationImageToImageMetric< TFixedImage, TMovingImage >
 ::LaunchComputeDerivativeLowMemoryThreaderCallback( void ) const
 {
-  /** Setup local threader. */
-  // \todo: is a global threader better performance-wise? check
-  typename ThreaderType::Pointer local_threader = ThreaderType::New();
-  local_threader->SetNumberOfThreads( this->m_NumberOfThreads );
-  local_threader->SetSingleMethod( this->ComputeDerivativeLowMemoryThreaderCallback,
+  /** Setup threader. */
+  this->m_Threader->SetSingleMethod( this->ComputeDerivativeLowMemoryThreaderCallback,
     const_cast< void * >( static_cast< const void * >(
       &this->m_ParzenWindowMutualInformationThreaderParameters ) ) );
 
   /** Launch. */
-  local_threader->SingleMethodExecute();
+  this->m_Threader->SingleMethodExecute();
 
 } // end LaunchComputeDerivativeLowMemoryThreaderCallback()
 

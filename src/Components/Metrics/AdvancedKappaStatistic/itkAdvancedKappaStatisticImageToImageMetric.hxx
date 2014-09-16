@@ -11,9 +11,8 @@
      PURPOSE. See the above copyright notices for more information.
 
 ======================================================================*/
-
-#ifndef _itkAdvancedKappaStatisticImageToImageMetric_txx
-#define _itkAdvancedKappaStatisticImageToImageMetric_txx
+#ifndef _itkAdvancedKappaStatisticImageToImageMetric_hxx
+#define _itkAdvancedKappaStatisticImageToImageMetric_hxx
 
 #include "itkAdvancedKappaStatisticImageToImageMetric.h"
 
@@ -77,22 +76,22 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
   if( this->m_KappaGetValueAndDerivativePerThreadVariablesSize != this->m_NumberOfThreads )
   {
     delete[] this->m_KappaGetValueAndDerivativePerThreadVariables;
-    this->m_KappaGetValueAndDerivativePerThreadVariables
-                                                             = new AlignedKappaGetValueAndDerivativePerThreadStruct[ this->m_NumberOfThreads ];
+    this->m_KappaGetValueAndDerivativePerThreadVariables     = new AlignedKappaGetValueAndDerivativePerThreadStruct[ this->m_NumberOfThreads ];
     this->m_KappaGetValueAndDerivativePerThreadVariablesSize = this->m_NumberOfThreads;
   }
 
   /** Some initialization. */
-  const NumberOfParametersType nnzji = this->m_AdvancedTransform->GetNumberOfNonZeroJacobianIndices();
-  const SizeValueType          zero  = NumericTraits< SizeValueType >::Zero;
+  const SizeValueType       zero1 = NumericTraits< SizeValueType >::Zero;
+  const DerivativeValueType zero2 = NumericTraits< DerivativeValueType >::Zero;
   for( ThreadIdType i = 0; i < this->m_NumberOfThreads; ++i )
   {
-    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_NumberOfPixelsCounted = zero;
-    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_AreaSum               = zero;
-    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_AreaIntersection      = zero;
+    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_NumberOfPixelsCounted = zero1;
+    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_AreaSum               = zero1;
+    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_AreaIntersection      = zero1;
     this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeSum1.SetSize( this->GetNumberOfParameters() );
     this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeSum2.SetSize( this->GetNumberOfParameters() );
-    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_TransformJacobian.SetSize( FixedImageDimension, nnzji );
+    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeSum1.Fill( zero2 );
+    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeSum2.Fill( zero2 );
   }
 
 } // end InitializeThreadingParameters()
@@ -439,9 +438,6 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
    */
   this->BeforeThreadedGetValueAndDerivative( parameters );
 
-  /** Initialize some threading related parameters. */
-  this->InitializeThreadingParameters();
-
   /** Launch multi-threading metric */
   this->LaunchGetValueAndDerivativeThreaderCallback();
 
@@ -465,17 +461,13 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
   NonZeroJacobianIndicesType   nzji  = NonZeroJacobianIndicesType( nnzji );
   DerivativeType               imageJacobian( nzji.size() );
 
-  /** Get a handle to a pre-allocated transform Jacobian. */
-  TransformJacobianType & jacobian
-    = this->m_KappaGetValueAndDerivativePerThreadVariables[ threadId ].st_TransformJacobian;
-
   /** Get handles to the pre-allocated derivatives for the current thread.
-   * Also initialize per thread, instead of sequentially in InitializeThreadingParameters().
+   * The initialization is performed at the beginning of each resolution in
+   * InitializeThreadingParameters(), and at the end of each iteration in
+   * AfterThreadedGetValueAndDerivative() and the accumulate functions.
    */
   DerivativeType & vecSum1 = this->m_KappaGetValueAndDerivativePerThreadVariables[ threadId ].st_DerivativeSum1;
   DerivativeType & vecSum2 = this->m_KappaGetValueAndDerivativePerThreadVariables[ threadId ].st_DerivativeSum2;
-  vecSum1.Fill(  NumericTraits< DerivativeValueType >::Zero ); // seems needed unfortunately
-  vecSum2.Fill(  NumericTraits< DerivativeValueType >::Zero ); // seems needed unfortunately
 
   /** Get a handle to the sample container. */
   ImageSampleContainerPointer sampleContainer     = this->GetImageSampler()->GetOutput();
@@ -540,12 +532,18 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
       const RealType & fixedImageValue
         = static_cast< RealType >( ( *fiter ).Value().m_ImageValue );
 
+#if 0
       /** Get the TransformJacobian dT/dmu. */
       this->EvaluateTransformJacobian( fixedPoint, jacobian, nzji );
 
       /** Compute the inner products (dM/dx)^T (dT/dmu). */
       this->EvaluateTransformJacobianInnerProduct(
         jacobian, movingImageDerivative, imageJacobian );
+#else
+      /** Compute the inner product of the transform Jacobian dT/dmu and the moving image gradient dM/dx. */
+      this->m_AdvancedTransform->EvaluateJacobianWithImageGradientProduct(
+        fixedPoint, movingImageDerivative, imageJacobian, nzji );
+#endif
 
       /** Compute this pixel's contribution to the measure and derivatives. */
       this->UpdateValueAndDerivativeTerms(
@@ -583,6 +581,9 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
   {
     this->m_NumberOfPixelsCounted
       += this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_NumberOfPixelsCounted;
+
+    /** Reset this variable for the next iteration. */
+    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_NumberOfPixelsCounted = 0;
   }
 
   /** Check if enough samples were valid. */
@@ -591,12 +592,17 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
     sampleContainer->Size(), this->m_NumberOfPixelsCounted );
 
   /** Accumulate values. */
-  MeasureType areaSum      = NumericTraits< MeasureType >::Zero;
-  MeasureType intersection = NumericTraits< MeasureType >::Zero;
+  const MeasureType zero = NumericTraits< MeasureType >::Zero;
+  MeasureType areaSum      = zero;
+  MeasureType intersection = zero;
   for( ThreadIdType i = 0; i < this->m_NumberOfThreads; ++i )
   {
     areaSum      += this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_AreaSum;
     intersection += this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_AreaIntersection;
+
+    /** Reset these variables for the next iteration. */
+    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_AreaSum = zero;
+    this->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_AreaIntersection = zero;
   }
 
   if( areaSum == 0 ) { return; }
@@ -633,10 +639,8 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
     temp->st_Coefficient2      = tmp2;
     temp->st_DerivativePointer = derivative.begin();
 
-    typename ThreaderType::Pointer local_threader = ThreaderType::New();
-    local_threader->SetNumberOfThreads( this->m_NumberOfThreads );
-    local_threader->SetSingleMethod( AccumulateDerivativesThreaderCallback, temp );
-    local_threader->SingleMethodExecute();
+    this->m_Threader->SetSingleMethod( AccumulateDerivativesThreaderCallback, temp );
+    this->m_Threader->SingleMethodExecute();
 
     delete temp;
   }
@@ -663,19 +667,23 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
   const unsigned int numPar  = temp->st_Metric->GetNumberOfParameters();
   const unsigned int subSize = static_cast< unsigned int >(
     vcl_ceil( static_cast< double >( numPar ) / static_cast< double >( nrOfThreads ) ) );
-
   unsigned int jmin = threadId * subSize;
   unsigned int jmax = ( threadId + 1 ) * subSize;
   jmax = ( jmax > numPar ) ? numPar : jmax;
 
+  const DerivativeValueType zero = NumericTraits< DerivativeValueType >::Zero;
+  DerivativeValueType sum1, sum2; 
   for( unsigned int j = jmin; j < jmax; j++ )
   {
-    DerivativeValueType sum1 = NumericTraits< DerivativeValueType >::Zero;
-    DerivativeValueType sum2 = NumericTraits< DerivativeValueType >::Zero;
+    sum1 = sum2 = zero;
     for( ThreadIdType i = 0; i < nrOfThreads; ++i )
     {
       sum1 += temp->st_Metric->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeSum1[ j ];
       sum2 += temp->st_Metric->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeSum2[ j ];
+
+      /** Reset these variables for the next iteration. */
+      temp->st_Metric->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeSum1[ j ] = zero;
+      temp->st_Metric->m_KappaGetValueAndDerivativePerThreadVariables[ i ].st_DerivativeSum2[ j ] = zero;
     }
     temp->st_DerivativePointer[ j ]
       = temp->st_Coefficient1 * sum1 - temp->st_Coefficient2 * sum2;
@@ -762,9 +770,6 @@ AdvancedKappaStatisticImageToImageMetric< TFixedImage, TMovingImage >
 
 /**
  * *************** ComputeGradient ***************************
- *
- * Compute the moving image gradient (dM/dx) and assigns to m_GradientImage.
- * Overrides superclass implementation.
  */
 
 template< class TFixedImage, class TMovingImage >

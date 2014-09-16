@@ -22,7 +22,7 @@
 #include "vnl/vnl_math.h"
 #include <itksys/SystemTools.hxx>
 #include "itkVector.h"
-#include "itkTransformToDisplacementFieldSource.h"
+#include "itkTransformToDisplacementFieldFilter.h"
 #include "itkTransformToDeterminantOfSpatialJacobianSource.h"
 #include "itkTransformToSpatialJacobianSource.h"
 #include "itkImageFileWriter.h"
@@ -697,15 +697,16 @@ TransformBase< TElastix >
       << std::endl;
   }
 
-  /** Write the way Transforms are combined. */
+  /** Write the way Transforms are combined. 
+   *  Set it to the default "Compose" when no combination transform is used. */
   std::string                      combinationMethod = "Compose";
   const CombinationTransformType * dummyComboTransform
     = dynamic_cast< const CombinationTransformType * >( this );
   if( dummyComboTransform )
   {
-    if( dummyComboTransform->GetUseComposition() )
+    if( dummyComboTransform->GetUseAddition() )
     {
-      combinationMethod = "Compose";
+      combinationMethod = "Add";
     }
   }
 
@@ -1441,14 +1442,12 @@ TransformBase< TElastix >
 ::TransformPointsAllPoints( void ) const
 {
   /** Typedef's. */
-  typedef typename FixedImageType::RegionType    FixedImageRegionType;
   typedef typename FixedImageType::DirectionType FixedImageDirectionType;
   typedef itk::Vector<
     float, FixedImageDimension >                      VectorPixelType;
   typedef itk::Image<
     VectorPixelType, FixedImageDimension >            DeformationFieldImageType;
-  typedef typename DeformationFieldImageType::Pointer DeformationFieldImagePointer;
-  typedef itk::TransformToDisplacementFieldSource<
+  typedef itk::TransformToDisplacementFieldFilter<
     DeformationFieldImageType, CoordRepType >         DeformationFieldGeneratorType;
   typedef itk::ChangeInformationImageFilter<
     DeformationFieldImageType >                       ChangeInfoFilterType;
@@ -1458,13 +1457,13 @@ TransformBase< TElastix >
   /** Create an setup deformation field generator. */
   typename DeformationFieldGeneratorType::Pointer defGenerator
     = DeformationFieldGeneratorType::New();
-  defGenerator->SetOutputSize(
+  defGenerator->SetSize(
     this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetSize() );
   defGenerator->SetOutputSpacing(
     this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetOutputSpacing() );
   defGenerator->SetOutputOrigin(
     this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetOutputOrigin() );
-  defGenerator->SetOutputIndex(
+  defGenerator->SetOutputStartIndex(
     this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetOutputStartIndex() );
   defGenerator->SetOutputDirection(
     this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetOutputDirection() );

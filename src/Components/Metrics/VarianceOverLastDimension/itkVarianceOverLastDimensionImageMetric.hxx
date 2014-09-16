@@ -2,7 +2,7 @@
 
   This file is part of the elastix software.
 
-  Copyright (c) Erasmus MC, Rotterdam. All rights reserved.
+  Copyright (c) University Medical Center Utrecht. All rights reserved.
   See src/CopyrightElastix.txt or http://elastix.isi.uu.nl/legal.php for
   details.
 
@@ -11,7 +11,6 @@
      PURPOSE. See the above copyright notices for more information.
 
 ======================================================================*/
-
 #ifndef __itkVarianceOverLastDimensionImageMetric_hxx
 #define __itkVarianceOverLastDimensionImageMetric_hxx
 
@@ -365,7 +364,6 @@ VarianceOverLastDimensionImageMetric< TFixedImage, TMovingImage >
 
   /** Define derivative and Jacobian types. */
   typedef typename DerivativeType::ValueType        DerivativeValueType;
-  typedef typename TransformJacobianType::ValueType TransformJacobianValueType;
 
   /** Initialize some variables */
   this->m_NumberOfPixelsCounted = 0;
