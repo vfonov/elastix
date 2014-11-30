@@ -69,6 +69,10 @@ main( int argc, char ** argv )
   RegisterMevisDicomTiff();
 #endif //ELASTIX_USE_MEVIS  
   
+<<<<<<< HEAD
+=======
+  /** Some declarations and initialisations. */
+>>>>>>> 6604093752d264a1f3fa54628e1da4ae93380cbc
   ElastixMainVectorType elastices;
 
   ObjectPointer              transform            = 0;
