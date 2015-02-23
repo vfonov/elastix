@@ -44,6 +44,28 @@ if( ELASTIX_USE_CUDA )
 endif()
 
 #---------------------------------------------------------------------
+# Find OpenCL.
+option( ELASTIX_USE_OPENCL "Use OpenCL enabled GPU" OFF )
+
+if( ELASTIX_USE_OPENCL )
+  find_package( OpenCL REQUIRED )
+  # Force OPENCL_OPTIMIZATION_MAD_ENABLE to on
+  if( DEFINED OPENCL_OPTIMIZATION_MAD_ENABLE )
+    set( OPENCL_OPTIMIZATION_MAD_ENABLE ON CACHE BOOL
+      "Allow a * b + c to be replaced by a mad. The mad computes a * b + c with reduced accuracy." FORCE )
+  endif()
+
+  # Include the OpenCL include directories to elastix
+  include_directories( ${OPENCL_INCLUDE_DIRS} )
+
+  # Add some useful macro's
+  include( elastixOpenCL )
+
+  # Add definition for the OpenCL
+  add_definitions( -DELASTIX_USE_OPENCL )
+endif()
+
+#---------------------------------------------------------------------
 # Find Eigen
 mark_as_advanced( ELASTIX_USE_EIGEN )
 option( ELASTIX_USE_EIGEN "Use Eigen library" OFF )
@@ -160,10 +182,18 @@ set( elxCommon_INCLUDE_DIRECTORIES
 )
 
 IF(ELASTIX_USE_MEVISDICOMTIFF) 
-  SET( elxCommon_INCLUDE_DIRECTORIES ${elxCommon_INCLUDE_DIRECTORIES}   ${elastix_SOURCE_DIR}/Common/MevisDicomTiff)
+  SET( elxCommon_INCLUDE_DIRECTORIES ${elxCommon_INCLUDE_DIRECTORIES} ${elastix_SOURCE_DIR}/Common/MevisDicomTiff)
 ENDIF(ELASTIX_USE_MEVISDICOMTIFF)
 
-SET( elxCore_INCLUDE_DIRECTORIES
+set( elxCommon_OpenCL_INCLUDE_DIRECTORIES
+  ${elastix_SOURCE_DIR}/Common/OpenCL
+  ${elastix_SOURCE_DIR}/Common/OpenCL/Factories
+  ${elastix_SOURCE_DIR}/Common/OpenCL/ITKimprovements
+  ${elastix_SOURCE_DIR}/Common/OpenCL/Filters
+  ${elastix_SOURCE_DIR}/Common/OpenCL/Kernels
+)
+
+set( elxCore_INCLUDE_DIRECTORIES
   ${elastix_SOURCE_DIR}/Core
   ${elastix_SOURCE_DIR}/Core/Install
   ${elastix_SOURCE_DIR}/Core/Kernel
@@ -194,6 +224,15 @@ set( elxINCLUDE_DIRECTORIES
 )
 
 include_directories( ${elxINCLUDE_DIRECTORIES} )
+
+# include the OpenCL directories
+# The key-word BEFORE is important here, because the elastix distribution
+# contains some files with the same name as in the ITK distribution.
+# Some bugs were fixed and features added. When these are contributed back
+# to the ITK the BEFORE keyword is not needed anymore.
+if( ELASTIX_USE_OPENCL )
+  include_directories( BEFORE ${elxCommon_OpenCL_INCLUDE_DIRECTORIES} )
+endif()
 
 #---------------------------------------------------------------------
 # Microsoft specific items
@@ -410,7 +449,7 @@ if( ELASTIX_ENABLE_PACKAGER )
   #set( CPACK_PACKAGE_DESCRIPTION_FILE
   #  "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt" )
   set( CPACK_RESOURCE_FILE_LICENSE
-    "${CMAKE_CURRENT_SOURCE_DIR}/CopyrightElastix.txt" )
+	  "${CMAKE_CURRENT_SOURCE_DIR}/NOTICE" )
 
   # The default install directories: .../elastix_v4.3
   set( CPACK_PACKAGE_INSTALL_DIRECTORY

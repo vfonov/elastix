@@ -122,7 +122,7 @@ if( ELASTIX_BUILD_EXECUTABLE )
     Kernel/elxElastixMain.h
     ${InstallFilesForExecutables}
   )
-else(ELASTIX_BUILD_EXECUTABLE)
+else()
   if( ELASTIX_BUILD_SHARED_LIBS )
     add_library( elastix SHARED
       Main/elastixlib.cxx
@@ -131,7 +131,7 @@ else(ELASTIX_BUILD_EXECUTABLE)
       Kernel/elxElastixMain.h
       ${InstallFilesForExecutables}
     )
-  else(ELASTIX_BUILD_SHARED_LIBS)
+  else()
     add_library( elastix STATIC
       Main/elastixlib.cxx
       Main/elastixlib.h
@@ -166,7 +166,7 @@ else()
       Kernel/elxTransformixMain.h
       ${InstallFilesForExecutables}
     )
-  else( ELASTIX_BUILD_SHARED_LIBS )
+  else()
     add_library( transformix STATIC
       Main/transformixlib.cxx
       Main/transformixlib.h
@@ -191,6 +191,10 @@ target_link_libraries( elastix
   ${ITK_LIBRARIES}
 )
 
+if( ELASTIX_USE_OPENCL )
+  target_link_libraries( elastix elxOpenCL )
+endif()
+
 #---------------------------------------------------------------------
 # Link transformix against other libraries.
 
@@ -202,6 +206,10 @@ target_link_libraries( transformix
   ${AllComponentLibs}
   ${ITK_LIBRARIES}
 )
+
+if( ELASTIX_USE_OPENCL )
+  target_link_libraries( transformix elxOpenCL )
+endif()
 
 if( MSVC )
   # NOTE: that linker /INCREMENTAL:NO flag makes it impossible to use
@@ -230,13 +238,13 @@ if( WIN32 )
     install( TARGETS elastix transformix
       RUNTIME DESTINATION . )
       #COMPONENT core )
-  else( ELASTIX_BUILD_EXECUTABLE )
+  else()
     # transformix is not implemented as library yet
     install( TARGETS elastix transformix
       RUNTIME DESTINATION .
       ARCHIVE DESTINATION . )
   endif()
-else( WIN32 )
+else()
   # Tell the executables where to find the required .so files.
   set_target_properties( elastix transformix
     PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${ITK_DIR}" )
