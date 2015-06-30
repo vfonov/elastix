@@ -136,8 +136,7 @@ ResamplerBase< TElastix >
     /** Print the elapsed time for the resampling. */
     timer.Stop();
     elxout << "  Applying transform took "
-           << this->ConvertSecondsToDHMS( timer.GetMean() )
-           << std::endl;
+      << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
 
   } // end if
 
@@ -249,7 +248,7 @@ ResamplerBase< TElastix >
     timer.Start();
 
     /** Apply the final transform, and save the result,
-     * by calling WriteResultImage.
+     * by calling ResampleAndWriteResultImage.
      */
     elxout << "\nApplying final transform ..." << std::endl;
     try
@@ -264,12 +263,8 @@ ResamplerBase< TElastix >
 
     /** Print the elapsed time for the resampling. */
     timer.Stop();
-    elxout << std::setprecision( 2 );
     elxout << "  Applying final transform took "
-           << this->ConvertSecondsToDHMS( timer.GetMean() )
-           << std::endl;
-    elxout << std::setprecision(
-      this->m_Elastix->GetDefaultOutputPrecision() );
+      << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
   }
   else
   {

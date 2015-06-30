@@ -1,6 +1,12 @@
 #---------------------------------------------------------------------
 cmake_minimum_required( VERSION 2.8 )
 cmake_policy( SET CMP0012 NEW )
+if( POLICY CMP0033 )
+  # This policy was introduced in cmake 3, so we need to check for its
+  # existence. When the minimum cmake version above is upgraded to 3
+  # this if(POLICY) check can be removed.
+  cmake_policy( SET CMP0033 OLD )
+endif()
 
 #---------------------------------------------------------------------
 project( elastix )
@@ -273,6 +279,7 @@ add_subdirectory( Core )
 # Configure the examples
 
 set( ELASTIX_DOX_DIR  ${elastix_SOURCE_DIR}/../dox )
+set( ELASTIX_TOOLS_DIR  ${elastix_SOURCE_DIR}/../tools )
 set( ELASTIX_HELP_DIR ${elastix_SOURCE_DIR}/../help CACHE PATH
   "path to the doxygen generated help files and the examples" )
 
@@ -400,7 +407,8 @@ if( ELASTIX_ENABLE_PACKAGER )
 
   # Also install the copyright file, since when the user enables packaging
   # we assume that the package is meant to distribute.
-  install( FILES "${elastix_SOURCE_DIR}/CopyrightElastix.txt" DESTINATION . )
+  install( FILES "${elastix_SOURCE_DIR}/LICENSE" DESTINATION . )
+  install( FILES "${elastix_SOURCE_DIR}/NOTICE" DESTINATION . )
 
   # We have split the elastix package into two components:
   # - the core: elastix and transformix
@@ -463,9 +471,9 @@ if( ELASTIX_ENABLE_PACKAGER )
   set( CPACK_SET_DESTDIR "OFF")
 
   # Make sure the directory structure is kept in the source zip
-  # and that also the dox directory is included.
+  # and that also the dox and tools directories are included.
   set( CPACK_SOURCE_INSTALLED_DIRECTORIES
-    "${elastix_SOURCE_DIR};/src;${ELASTIX_DOX_DIR};/dox" )
+    "${elastix_SOURCE_DIR};/src;${ELASTIX_DOX_DIR};/dox;${ELASTIX_TOOLS_DIR};/tools" )
 
   # ??
   #set(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
