@@ -116,15 +116,16 @@ main( int argc, char ** argv )
     {
       argMap.insert( ArgumentMapEntryType( "quiet", "on" ) );
       quiet_mode = true;
-    } else if( key == "--verbose" ) 
+    } 
+    else if( key == "-v" || key == "--verbose" ) 
     {
       argMap.insert( ArgumentMapEntryType( "quiet", "off" ) );
     }
     else
     {
+      value = argv [ i++ ];
       if( key == "-out" )
       {
-        value = argv[i ++ ];
         /** Make sure that last character of the output folder equals a '/' or '\'. */
         const char last = value[ value.size() - 1 ];
         if( last != '/' && last != '\\' ) { value.append( "/" ); }
@@ -145,10 +146,6 @@ main( int argc, char ** argv )
         outFolder        = value;
 
       } // end if key == "-out"
-      else 
-      {
-              value = argv[i ++ ];
-      }
 
       /** Attempt to save the arguments in the ArgumentMap. */
       if( argMap.count( key.c_str() ) == 0 )
