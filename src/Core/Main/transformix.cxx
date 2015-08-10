@@ -74,7 +74,7 @@ main( int argc, char ** argv )
   bool            quiet_mode       = false;
 
   /** Put command line parameters into parameterFileList. */
-  for( unsigned int i = 1; static_cast< long >( i ) < argc - 1; )
+  for( unsigned int i = 1; static_cast< long >( i ) < argc ; )
   {
     std::string key( argv[ i++ ] );
     std::string value;
