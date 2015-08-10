@@ -106,12 +106,12 @@ main( int argc, char ** argv )
     } // end if key == "-out"
     else if( key == "-q" || key == "--quiet" ) 
     {
-      argMap.insert( ArgumentMapEntryType( "quiet", "on" ) );
+      argMap.insert( ArgumentMapEntryType( "-q", "on" ) );
       quiet_mode = true;
     } 
     else if( key == "-v" || key == "--verbose" ) 
     {
-      argMap.insert( ArgumentMapEntryType( "quiet", "off" ) );
+      argMap.insert( ArgumentMapEntryType( "-q", "off" ) );
     }
     else 
     {
