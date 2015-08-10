@@ -401,6 +401,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
     xout[ "error" ] << excp << std::endl;
     xout[ "error" ] << "However, transformix continues anyway." << std::endl;
   }
+  
   timer.Stop();
   elxout << "  Transforming points done, it took "
     << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
@@ -476,6 +477,21 @@ ElastixTemplate< TFixedImage, TMovingImage >
       << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
   }
 
+  std::string       xfm = this->GetConfiguration()->GetCommandLineArgument( "-xfm" );
+  std::string       def = this->GetConfiguration()->GetCommandLineArgument( "-def" );
+  if(!xfm.empty() && def.empty())
+  {
+    try
+    {
+      this->GetElxTransformBase()->WriteToITKFile(xfm.c_str());
+    }
+    catch( itk::ExceptionObject & excp )
+    {
+      xout[ "error" ] << excp << std::endl;
+      xout[ "error" ] << "However, transformix continues anyway." << std::endl;
+    }
+  }
+  
   /** Return a value. */
   return 0;
 

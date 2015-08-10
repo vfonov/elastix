@@ -127,11 +127,13 @@ main( int argc, char ** argv )
   }
 
   /** Check that at least one of the following options is given. */
-  if( argMap.count( "-in" ) == 0
+  if(  argMap.count( "-in" ) == 0
     && argMap.count( "-ipp" ) == 0
     && argMap.count( "-def" ) == 0
     && argMap.count( "-jac" ) == 0
-    && argMap.count( "-jacmat" ) == 0 )
+    && argMap.count( "-jacmat" ) == 0
+    && argMap.count( "-xfm") == 0 
+     )
   {
     std::cerr << "ERROR: At least one of the CommandLine options \"-in\", "
               << "\"-def\", \"-jac\", or \"-jacmat\" should be given!" << std::endl;

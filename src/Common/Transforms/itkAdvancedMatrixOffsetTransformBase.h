@@ -434,6 +434,13 @@ public:
     SpatialHessianType & sh,
     JacobianOfSpatialHessianType & jsh,
     NonZeroJacobianIndicesType & nonZeroJacobianIndices ) const;
+    
+    
+  virtual TransformTypePointer GetITKCompatibleTransform() const 
+  {
+    
+  }
+
 
 protected:
 

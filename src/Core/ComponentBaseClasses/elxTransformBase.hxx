@@ -37,6 +37,11 @@
 #include "itkMeshFileReader.h"
 #include "itkMeshFileWriter.h"
 #include "itkTransformMeshFilter.h"
+#include "itkDisplacementFieldTransform.h"
+#include "itkTransformFileWriter.h"
+#include "itkTransformFactory.h"
+#include "itkAdvancedMatrixOffsetTransformBase.h"
+#include "itkCompositeTransform.h"
 
 namespace itk
 {
@@ -823,6 +828,54 @@ TransformBase< TElastix >
 
 } // end WriteToFile()
 
+/**
+ * ******************* WriteToITKFile ******************************
+ */
+
+template< class TElastix >
+void
+TransformBase< TElastix >
+::WriteToITKFile( const char *fname ) 
+{
+  
+  // deal with combination transform:
+  typename CombinationTransformType::Pointer xfms=dynamic_cast<CombinationTransformType * >( this );
+  
+  if( xfms.IsNotNull())
+  {
+    typedef  itk::TransformFileWriterTemplate<CoordRepType>     TransformWriterType;
+    typename TransformWriterType::Pointer transformWriter = TransformWriterType::New();
+    
+    typedef itk::CompositeTransform<CoordRepType, FixedImageDimension>  CompositeTransformType;
+    typedef itk::AdvancedTransform<CoordRepType, FixedImageDimension, FixedImageDimension > AdvancedTransformType;
+    typedef itk::Transform<CoordRepType, FixedImageDimension, FixedImageDimension > GenericTransformType;
+    
+    typedef typename CompositeTransformType::Pointer     CompositeTransformPointer;
+    
+    CompositeTransformPointer tmp_comp_xfm=CompositeTransformType::New();
+    
+    size_t numTransforms = xfms->GetNumberOfTransforms();
+    
+    for( size_t i = 0; i < numTransforms; i++ )
+    {
+      AdvancedTransformType *_xfm=dynamic_cast<AdvancedTransformType *>(xfms->GetNthTransform( i ));
+      
+      tmp_comp_xfm->AddTransform(_xfm->GetITKCompatibleTransform());
+    }
+    
+    transformWriter->SetInput( tmp_comp_xfm );
+    transformWriter->SetFileName( fname );
+
+    /** Do the writing. */
+    elxout << "  Writing directly into transform file..." << std::endl;
+    transformWriter->Update();
+  } else {
+    elxout << "  This is not a composite transform!..." << std::endl;
+    xl::xout[ "error" ] << "  ITK writer for "<< this->GetAsITKBaseType()->GetTransformTypeAsString()<< " not implemented!" << std::endl;
+  }
+} // end WriteToITKFile()
+
+
 
 /**
  * ******************* CreateTransformParametersMap ******************************
@@ -1053,6 +1106,7 @@ TransformBase< TElastix >
    */
   const std::string ipp = this->GetConfiguration()->GetCommandLineArgument( "-ipp" );
   std::string       def = this->GetConfiguration()->GetCommandLineArgument( "-def" );
+  std::string       xfm = this->GetConfiguration()->GetCommandLineArgument( "-xfm" );
 
   /** For backwards compatibility def = ipp. */
   if( def != "" && ipp != "" )
@@ -1090,9 +1144,9 @@ TransformBase< TElastix >
   }
   else
   {
-    // just a message
-    elxout << "  The command-line option \"-def\" is not used, "
-           << "so no points are transformed" << std::endl;
+      // just a message
+      elxout << "  The command-line option \"-def\" is not used, "
+            << "so no points are transformed" << std::endl;
   }
 
 } // end TransformPoints()
@@ -1457,6 +1511,12 @@ TransformBase< TElastix >
     DeformationFieldImageType >                       ChangeInfoFilterType;
   typedef itk::ImageFileWriter<
     DeformationFieldImageType >                       DeformationFieldWriterType;
+    
+  typedef typename itk::DisplacementFieldTransform<float, 
+    FixedImageDimension>                              DisplacementFieldTransformType;
+    
+  typedef itk::TransformFileWriterTemplate<float>     TransformWriterType;
+
 
   /** Create an setup deformation field generator. */
   typename DeformationFieldGeneratorType::Pointer defGenerator
@@ -1482,6 +1542,9 @@ TransformBase< TElastix >
   infoChanger->SetOutputDirection( originalDirection );
   infoChanger->SetChangeDirection( retdc & !this->GetElastix()->GetUseDirectionCosines() );
   infoChanger->SetInput( defGenerator->GetOutput() );
+  
+  std::string       xfm = this->GetConfiguration()->GetCommandLineArgument( "-xfm" );
+
 
   /** Track the progress of the generation of the deformation field. */
 #ifndef _ELASTIX_BUILD_LIBRARY
@@ -1490,32 +1553,45 @@ TransformBase< TElastix >
   progressObserver->SetStartString( "  Progress: " );
   progressObserver->SetEndString( "%" );
 #endif
-
-  /** Create a name for the deformation field file. */
-  std::string resultImageFormat = "mhd";
-  this->m_Configuration->ReadParameter( resultImageFormat, "ResultImageFormat", 0, false );
-  std::ostringstream makeFileName( "" );
-  makeFileName << this->m_Configuration->GetCommandLineArgument( "-out" )
-               << "deformationField." << resultImageFormat;
-
-  /** Write outputImage to disk. */
-  typename DeformationFieldWriterType::Pointer defWriter
-    = DeformationFieldWriterType::New();
-  defWriter->SetInput( infoChanger->GetOutput() );
-  defWriter->SetFileName( makeFileName.str().c_str() );
-
-  /** Do the writing. */
-  elxout << "  Computing and writing the deformation field ..." << std::endl;
   try
   {
-    defWriter->Update();
+    /** VF: let's try to store transformation using ITK transform factory, first*/
+    if( !xfm.empty())
+    {
+      typename DisplacementFieldTransformType::Pointer tmp_xfrm=DisplacementFieldTransformType::New();
+      tmp_xfrm->SetDisplacementField(infoChanger->GetOutput());
+      typename TransformWriterType::Pointer transformWriter = TransformWriterType::New();
+      transformWriter->SetInput( tmp_xfrm );
+      transformWriter->SetFileName(xfm.c_str() );
+      
+      /** Do the writing. */
+      elxout << "  Computing and writing the deformation field into transform file..." << std::endl;
+      transformWriter->Update();
+    } else {  
+      /** Create a name for the deformation field file. */
+      std::string resultImageFormat = "mhd";
+      this->m_Configuration->ReadParameter( resultImageFormat, "ResultImageFormat", 0, false );
+      std::ostringstream makeFileName( "" );
+      makeFileName << this->m_Configuration->GetCommandLineArgument( "-out" )
+                  << "deformationField." << resultImageFormat;
+
+      /** Write outputImage to disk. */
+      typename DeformationFieldWriterType::Pointer defWriter
+        = DeformationFieldWriterType::New();
+      defWriter->SetInput( infoChanger->GetOutput() );
+      defWriter->SetFileName( makeFileName.str().c_str() );
+
+      /** Do the writing. */
+      elxout << "  Computing and writing the deformation field ..." << std::endl;
+      defWriter->Update();
+    }
   }
   catch( itk::ExceptionObject & excp )
   {
     /** Add information to the exception. */
     excp.SetLocation( "TransformBase - TransformPointsAllPoints()" );
     std::string err_str = excp.GetDescription();
-    err_str += "\nError occurred while writing deformation field image.\n";
+    err_str += "\nError occurred while writing deformation field image or transform file.\n";
     excp.SetDescription( err_str );
 
     /** Pass the exception to an higher level. */
