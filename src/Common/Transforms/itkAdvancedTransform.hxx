@@ -121,6 +121,20 @@ AdvancedTransform< TScalarType, NInputDimensions, NOutputDimensions >
 } // end GetNumberOfNonZeroJacobianIndices()
 
 
+/**
+ * ********************* GetITKCompatibleTransform ****************************
+ */
+template< class TScalarType, unsigned int NInputDimensions, unsigned int NOutputDimensions >
+typename AdvancedTransform< TScalarType, NInputDimensions, NOutputDimensions >::TransformTypePointer 
+AdvancedTransform< TScalarType, NInputDimensions, NOutputDimensions >
+::GetITKCompatibleTransform() const 
+{
+  // this conversion was not implmented probably!
+  itkExceptionMacro( << "Not implemented yet, call back later!" );
+} // end GetITKCompatibleTransform
+
+
+
 } // end namespace itk
 
 #endif

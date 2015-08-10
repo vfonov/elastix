@@ -38,6 +38,7 @@
 #include "itkNumericTraits.h"
 #include "itkAdvancedMatrixOffsetTransformBase.h"
 #include "vnl/algo/vnl_matrix_inverse.h"
+#include "itkAffineTransform.h"
 
 namespace itk
 {
@@ -722,6 +723,26 @@ AdvancedMatrixOffsetTransformBase< TScalarType, NInputDimensions, NOutputDimensi
   nonZeroJacobianIndices = this->m_NonZeroJacobianIndices;
 
 } // end GetJacobianOfSpatialHessian()
+
+
+template< class TScalarType, unsigned int NInputDimensions,
+unsigned int NOutputDimensions >
+typename AdvancedMatrixOffsetTransformBase< TScalarType,
+NInputDimensions,
+NOutputDimensions >::TransformTypePointer 
+AdvancedMatrixOffsetTransformBase< TScalarType, NInputDimensions, NOutputDimensions >
+::GetITKCompatibleTransform() const
+{
+  // assume that we can always convert this into an affine transform
+  typedef AffineTransform<TScalarType,NInputDimensions> AffineTransformType;
+  typedef typename AffineTransformType::Pointer AffineTransformPointer;
+  
+  AffineTransformPointer _transform = AffineTransformType::New();
+  _transform->SetMatrix(this->GetMatrix());
+  _transform->SetOffset(this->GetOffset());
+  return _transform.GetPointer();
+}
+
 
 
 } // namespace

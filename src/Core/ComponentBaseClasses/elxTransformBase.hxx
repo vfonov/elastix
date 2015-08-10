@@ -858,8 +858,7 @@ TransformBase< TElastix >
     
     for( size_t i = 0; i < numTransforms; i++ )
     {
-      AdvancedTransformType *_xfm=dynamic_cast<AdvancedTransformType *>(xfms->GetNthTransform( i ));
-      
+      const AdvancedTransformType *_xfm=dynamic_cast<const AdvancedTransformType *>(xfms->GetNthTransform( i ).GetPointer());
       tmp_comp_xfm->AddTransform(_xfm->GetITKCompatibleTransform());
     }
     

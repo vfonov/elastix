@@ -312,7 +312,7 @@ public:
   /**
    * Convert transform into a standard ITK object , for interoperability only
    */
-  virtual TransformTypePointer GetITKCompatibleTransform() const = 0;
+  virtual TransformTypePointer GetITKCompatibleTransform() const ;
 
 protected:
 
