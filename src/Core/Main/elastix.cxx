@@ -89,15 +89,18 @@ main( int argc, char ** argv )
   bool                       outFolderPresent = false;
   std::string                outFolder        = "";
   std::string                logFileName      = "";
+  bool                       quiet_mode       = false;
 
   /** Put command line parameters into parameterFileList. */
-  for( unsigned int i = 1; static_cast< long >( i ) < ( argc - 1 ); i += 2 )
+  for( unsigned int i = 1; static_cast< long >( i ) < ( argc - 1 ); )
   {
-    std::string key( argv[ i ] );
-    std::string value( argv[ i + 1 ] );
+    std::string key( argv[ i ++ ] );
+    std::string value;
 
     if( key == "-p" )
     {
+      value = argv[i ++ ];
+      
       /** Queue the ParameterFileNames. */
       nrOfParameterFiles++;
       parameterFileList.push(
@@ -109,10 +112,19 @@ main( int argc, char ** argv )
       std::string tempPName = tempPname.str();
       argMap.insert( ArgumentMapEntryType( tempPName.c_str(), value.c_str() ) );
     }
+    else if( key == "-q" || key == "--quiet" ) 
+    {
+      argMap.insert( ArgumentMapEntryType( "quiet", "on" ) );
+      quiet_mode = true;
+    } else if( key == "--verbose" ) 
+    {
+      argMap.insert( ArgumentMapEntryType( "quiet", "off" ) );
+    }
     else
     {
       if( key == "-out" )
       {
+        value = argv[i ++ ];
         /** Make sure that last character of the output folder equals a '/' or '\'. */
         const char last = value[ value.size() - 1 ];
         if( last != '/' && last != '\\' ) { value.append( "/" ); }
@@ -133,6 +145,10 @@ main( int argc, char ** argv )
         outFolder        = value;
 
       } // end if key == "-out"
+      else 
+      {
+              value = argv[i ++ ];
+      }
 
       /** Attempt to save the arguments in the ArgumentMap. */
       if( argMap.count( key.c_str() ) == 0 )
@@ -176,7 +192,7 @@ main( int argc, char ** argv )
     {
       /** Setup xout. */
       logFileName = outFolder + "elastix.log";
-      int returndummy2 = elx::xoutSetup( logFileName.c_str(), true, true );
+      int returndummy2 = elx::xoutSetup( logFileName.c_str(), true, !quiet_mode );
       if( returndummy2 )
       {
         std::cerr << "ERROR while setting up xout." << std::endl;
@@ -211,13 +227,12 @@ main( int argc, char ** argv )
   info.RunMemoryCheck();
   elxout << "elastix runs at: " << info.GetHostname() << std::endl;
   elxout << "  " << info.GetOSName() << " "
-         << info.GetOSRelease() << ( info.Is64Bits() ? " (x64), " : ", " )
-         << info.GetOSVersion() << std::endl;
+        << info.GetOSRelease() << ( info.Is64Bits() ? " (x64), " : ", " )
+        << info.GetOSVersion() << std::endl;
   elxout << "  with " << info.GetTotalPhysicalMemory() << " MB memory, and "
-         << info.GetNumberOfPhysicalCPU() << " cores @ "
-         << static_cast< unsigned int >( info.GetProcessorClockFrequency() )
-         << " MHz." << std::endl;
-
+        << info.GetNumberOfPhysicalCPU() << " cores @ "
+        << static_cast< unsigned int >( info.GetProcessorClockFrequency() )
+        << " MHz." << std::endl;
   /**
    * ********************* START REGISTRATION *********************
    *
