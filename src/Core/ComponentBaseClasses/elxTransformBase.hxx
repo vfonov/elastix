@@ -1540,6 +1540,34 @@ TransformBase< TElastix >
   bool                    retdc = this->GetElastix()->GetOriginalFixedImageDirection( originalDirection );
   infoChanger->SetOutputDirection( originalDirection );
   infoChanger->SetChangeDirection( retdc & !this->GetElastix()->GetUseDirectionCosines() );
+  
+  std::string       sub = this->GetConfiguration()->GetCommandLineArgument( "-sub" );
+  if(! sub.empty() )
+  {
+    double subsample=atof(sub.c_str());
+    if(subsample > 0 )
+    {
+      elxout << "  Subsampling deformation field..." << std::endl;
+      typename DeformationFieldImageType::SpacingType _spacing = this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetOutputSpacing();
+      typename DeformationFieldImageType::SizeType _size = this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetSize();
+      
+      for(int i = 0;i<FixedImageDimension;i++)
+      {
+        _size[i]=::ceil(_size[i]/subsample);
+        _spacing[i]*=subsample;
+      }
+      defGenerator->SetSize(_size);
+      infoChanger->SetOutputSpacing(_spacing);
+      
+      infoChanger->SetChangeSpacing(true);
+      infoChanger->SetChangeRegion(true);
+      
+    } else {
+      elxout << " Parameter for subsampling deformation field is wrong:"<<sub.c_str() << std::endl;
+    }
+  }
+  
+  
   infoChanger->SetInput( defGenerator->GetOutput() );
   
   std::string       xfm = this->GetConfiguration()->GetCommandLineArgument( "-xfm" );
@@ -1663,6 +1691,36 @@ TransformBase< TElastix >
   infoChanger->SetOutputDirection( originalDirection );
   infoChanger->SetChangeDirection( retdc & !this->GetElastix()->GetUseDirectionCosines() );
   infoChanger->SetInput( jacGenerator->GetOutput() );
+  
+  std::string       sub = this->GetConfiguration()->GetCommandLineArgument( "-sub" );
+  if(! sub.empty() )
+  {
+    double subsample=atof(sub.c_str());
+    if(subsample > 0 )
+    {
+      
+      elxout << "  Subsampling deformation field..." << std::endl;
+      typename JacobianImageType::SpacingType _spacing = this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetOutputSpacing();
+      typename JacobianImageType::SizeType _size = this->m_Elastix->GetElxResamplerBase()->GetAsITKBaseType()->GetSize();
+      
+      for(int i = 0;i<FixedImageDimension;i++)
+      {
+        _size[i]=::ceil(_size[i]/subsample);
+        _spacing[i]*=subsample;
+      }
+      jacGenerator->SetOutputSize(_size);
+      infoChanger->SetOutputSpacing(_spacing);
+      
+      infoChanger->SetChangeSpacing(true);
+      infoChanger->SetChangeRegion(true);
+      
+    } else {
+      elxout << " Parameter for subsampling deformation field is wrong:"<<sub.c_str() << std::endl;
+    }
+  }
+  
+  
+  
 #ifndef _ELASTIX_BUILD_LIBRARY
   /** Track the progress of the generation of the deformation field. */
   typename ProgressCommandType::Pointer progressObserver = ProgressCommandType::New();
