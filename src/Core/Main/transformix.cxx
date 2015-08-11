@@ -292,6 +292,12 @@ PrintHelp( void )
   std::cout << "\nAt least one of the options \"-in\", \"-def\", \"-jac\", or \"-jacmat\" should be given.\n"
             << std::endl;
 
+  std::cout << "Optional extra commands by VF:"<<std::endl;
+  std::cout << " -q/--quiet Don't display progress and system information" << std::endl;
+  std::cout << " -sub <f>   subsample deformation field and jacobian by this factor" << std::endl;
+  std::cout << " -xfm output  Output transformation either deformation field "<< std::endl<<
+               "              if -def is specified, or store parameters directly" << std::endl;
+  
   /** The parameter file. */
   std::cout << "The transform-parameter file must contain all the information "
     "necessary for transformix to run properly. That includes which transform "

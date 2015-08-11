@@ -380,6 +380,9 @@ PrintHelp( void )
   std::cout << "  -threads  set the maximum number of threads of elastix\n"
             << std::endl;
 
+  std::cout << "Optional extra commands by VF:"<<std::endl;
+  std::cout << " -q/--quiet Don't display progress and system information" << std::endl;
+            
   /** The parameter file.*/
   std::cout << "The parameter-file must contain all the information "
     "necessary for elastix to run properly. That includes which metric to "
