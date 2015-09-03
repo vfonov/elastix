@@ -1190,7 +1190,7 @@ the GCC compiler under Linux/MacOS.
 \begin{enumerate}
 \item Download and install CMake: \url{www.cmake.org}.
 
-\item Download and compile the ITK version 4.7.2: \url{www.itk.org}. Make
+\item Download and compile the ITK version 4.8: \url{www.itk.org}. Make
     sure to set the following (advanced) CMake variable to \texttt{ON}:
     \texttt{Module\_ITKReview}, and optionally \texttt{ITK\_USE\_64BITS\_IDS}
     and \texttt{ITK\_LEGACY\_REMOVE}. For faster building of ITK
@@ -1345,10 +1345,11 @@ the values need to be quoted:
 \begin{quote}
 \texttt{(ParameterName "value1" ... "valueN")}
 \end{quote}
-Comments can be provided by starting the line with `\texttt{//}'. A
-minimal example of a valid parameter file is given in Appendix
-\ref{chp:ExampleParam}. A list of available parameters for each
-class is given at
+Comments can be provided by starting the line with `\texttt{//}'.
+The order in which the parameters are given does not matter, but
+parameters can only be specified once. A minimal example of a valid
+parameter file is given in Appendix \ref{chp:ExampleParam}. A list
+of available parameters for each class is given at
 \url{http://elastix.isi.uu.nl/doxygen/parameter.html}. Examples of
 parameter files can be found at the wiki:
 \url{http://elastix.bigr.nl/wiki/index.php/Parameter_file_database}.
@@ -2836,7 +2837,7 @@ file:
 #include "elastixlib.h"
 #include "itkParameterFileParser.h"
 
-using namespace ELASTIX;
+using namespace elastix;
 typedef ELASTIX::ParameterMapType RegistrationParametersType;
 typedef itk::ParameterFileParser  ParserType;
 
@@ -2874,7 +2875,7 @@ the exact format.
 
 \subsubsection{Running \elastix}
 
-Once the parameter settings are loaded, run \elastix using, for
+Once the parameter settings are loaded, run \elastix\ using, for
 example, the following code:
 \begin{quote}
 \begin{verbatim}
