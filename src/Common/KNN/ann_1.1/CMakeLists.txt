@@ -1,5 +1,14 @@
 project( ANN )
 
+
+IF( APPLE )
+    SET(MACOSX_RPATH             ON)
+    SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+    SET(CMAKE_SKIP_RPATH         OFF)
+    SET(CMAKE_SKIP_INSTALL_RPATH OFF)
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+ENDIF( APPLE )
+
 # Compile time option to select wheter or not to accept self matches
 # during nearest neighbour search. The default is false for backward
 # compatibility.
@@ -40,25 +49,33 @@ set( ANN_SRCS
 )
 
 # Create the ANNlib library
-add_library( ANNlib SHARED ${ANN_SRCS} )
+add_library( ANNlib  ${ANN_SRCS} )
 
 # Necessary, because in windows dll_export is needed for creating the
 # dll, but dll_import for using it in a program.
-set_target_properties( ANNlib PROPERTIES DEFINE_SYMBOL DLL_EXPORTS )
+
+if( WIN32 )
+    set_target_properties( ANNlib PROPERTIES DEFINE_SYMBOL DLL_EXPORTS )
+endif( WIN32 )
 
 # Group in IDE's like Visual Studio
 set_property( TARGET ANNlib PROPERTY FOLDER "libraries" )
+
 
 # Install
 if( WIN32 )
   install( TARGETS ANNlib
     RUNTIME DESTINATION .
-    LIBRARY DESTINATION . )
+    LIBRARY DESTINATION . 
+    ARCHIVE DESTINATION . 
+  )
     #COMPONENT libraries )
 else()
   install( TARGETS ANNlib
     RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib )
+    LIBRARY DESTINATION lib 
+    ARCHIVE DESTINATION lib
+   )
     #COMPONENT libraries )
 endif()
 

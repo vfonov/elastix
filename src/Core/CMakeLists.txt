@@ -246,8 +246,10 @@ if( WIN32 )
   endif()
 else()
   # Tell the executables where to find the required .so files.
-  set_target_properties( elastix transformix
-    PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib:${ITK_DIR}" )
+  IF(NOT CMAKE_INSTALL_RPATH)
+      set_target_properties( elastix transformix
+        PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}:${ITK_DIR} )
+  ENDIF(NOT CMAKE_INSTALL_RPATH)
   # Put executables in bin and libraries in lib.
   install( TARGETS elastix transformix
     RUNTIME DESTINATION bin
