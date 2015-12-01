@@ -182,6 +182,7 @@ TransformBase< TElastix >
 
   /** Declare check. */
   std::string check = "";
+  std::string check_xfm = "";
 
   /** Check for appearance of "-ipp". */
   check = this->m_Configuration->GetCommandLineArgument( "-ipp" );
@@ -192,9 +193,13 @@ TransformBase< TElastix >
     xl::xout[ "warning" ] << "WARNING: \"-ipp\" is deprecated, use \"-def\" instead!"
                           << std::endl;
   }
-
+  check_xfm = this->m_Configuration->GetCommandLineArgument( "-xfm" );
   /** Check for appearance of "-def". */
   check = this->m_Configuration->GetCommandLineArgument( "-def" );
+  
+  if( check_xfm != "" )
+    check="all";
+  
   if( check == "" )
   {
     elxout << "-def      unspecified, so no input points transformed" << std::endl;
@@ -1116,6 +1121,12 @@ TransformBase< TElastix >
   else if( def == "" && ipp != "" )
   {
     def = ipp;
+  }
+  
+  if( def == "" && xfm != "")
+  {
+    //silently setting this option
+    def = "all";
   }
 
   /** If there is an input point-file? */
