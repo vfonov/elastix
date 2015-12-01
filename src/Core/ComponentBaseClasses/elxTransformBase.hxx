@@ -1557,8 +1557,10 @@ TransformBase< TElastix >
         _spacing[i]*=subsample;
       }
       defGenerator->SetSize(_size);
-      infoChanger->SetOutputSpacing(_spacing);
+      defGenerator->SetOutputSpacing( _spacing );
+      defGenerator->SetTransform( const_cast< const ITKBaseType * >( this->GetAsITKBaseType() ) );
       
+      infoChanger->SetOutputSpacing(_spacing);
       infoChanger->SetChangeSpacing(true);
       infoChanger->SetChangeRegion(true);
       
@@ -1571,7 +1573,6 @@ TransformBase< TElastix >
   infoChanger->SetInput( defGenerator->GetOutput() );
   
   std::string       xfm = this->GetConfiguration()->GetCommandLineArgument( "-xfm" );
-
 
   /** Track the progress of the generation of the deformation field. */
 #ifndef _ELASTIX_BUILD_LIBRARY
