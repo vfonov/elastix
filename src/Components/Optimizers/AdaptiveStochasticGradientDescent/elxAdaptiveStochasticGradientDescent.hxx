@@ -86,26 +86,6 @@ AdaptiveStochasticGradientDescent< TElastix >
 
   this->m_SettingsVector.clear();
 
-  /** Temporary?: Use the multi-threaded version or not. Default true. */
-  std::string tmp = this->m_Configuration->GetCommandLineArgument( "-mto" ); // mto: multi-threaded optimizers
-  if( tmp == "true" || tmp == "" )
-  {
-    this->SetUseMultiThread( true );
-    std::string  tmp2        = this->m_Configuration->GetCommandLineArgument( "-threads" );
-    unsigned int nrOfThreads = atoi( tmp2.c_str() );
-    if( tmp2 != "" )
-    {
-      this->SetNumberOfThreads( nrOfThreads );
-    }
-  }
-  else { this->SetUseMultiThread( false ); }
-
-  // Use eigen or openmp for multi-threading? Default false = use itk threads.
-  tmp = this->m_Configuration->GetCommandLineArgument( "-useEigen" );
-  if( tmp == "true" ) { this->SetUseEigen( true ); }
-  tmp = this->m_Configuration->GetCommandLineArgument( "-useOpenMP" );
-  if( tmp == "true" ) { this->SetUseOpenMP( true ); }
-
 } // end BeforeRegistration()
 
 
@@ -190,8 +170,8 @@ AdaptiveStochasticGradientDescent< TElastix >
     /** Set the maximum step length: the maximum displacement of a voxel in mm.
      * Compute default value: mean in-plane spacing of fixed and moving image.
      */
-    const unsigned int fixdim = vnl_math_min( this->GetElastix()->FixedDimension, 2 );
-    const unsigned int movdim = vnl_math_min( this->GetElastix()->MovingDimension, 2 );
+    const unsigned int fixdim = vnl_math_min( (unsigned int) this->GetElastix()->FixedDimension, (unsigned int) 2 );
+    const unsigned int movdim = vnl_math_min( (unsigned int) this->GetElastix()->MovingDimension, (unsigned int) 2 );
     double             sum    = 0.0;
     for( unsigned int d = 0; d < fixdim; ++d )
     {

@@ -36,7 +36,7 @@
 #include <itksys/SystemTools.hxx>
 #include <itksys/SystemInformation.hxx>
 
-#include "elxTimer.h"
+#include "itkTimeProbe.h"
 
 namespace elastix
 {
@@ -47,7 +47,9 @@ namespace elastix
 
 ELASTIX::ELASTIX() :
   m_ResultImage( 0 )
-{} // end Constructor
+{
+} // end Constructor
+
 
 /**
  * ******************* Destructor ***********************
@@ -154,8 +156,6 @@ ELASTIX::RegisterImages(
   // Clear output transform parameters
   this->m_TransformParametersList.clear();
 
-  tmr::Timer::Pointer timer;
-
   /** Some declarations and initialisations. */
   ElastixMainVectorType elastices;
 
@@ -252,10 +252,9 @@ ELASTIX::RegisterImages(
   elxout << std::endl;
 
   /** Declare a timer, start it and print the start time. */
-  tmr::Timer::Pointer totaltimer = tmr::Timer::New();
-  totaltimer->StartTimer();
-  elxout << "elastix is started at " << totaltimer->PrintStartTime()
-         << ".\n" << std::endl;
+  itk::TimeProbe totaltimer;
+  totaltimer.Start();
+  elxout << "elastix is started at " << GetCurrentDateAndTime() << ".\n" << std::endl;
 
   /************************************************************************
    *                                              *
@@ -320,9 +319,9 @@ ELASTIX::RegisterImages(
     elxout << "Running elastix with parameter map " << i << std::endl;
 
     /** Declare a timer, start it and print the start time. */
-    timer = tmr::Timer::New();
-    timer->StartTimer();
-    elxout << "Current time: " << timer->PrintStartTime() << "." << std::endl;
+    itk::TimeProbe timer;
+    timer.Start();
+    elxout << "Current time: " << GetCurrentDateAndTime() << "." << std::endl;
 
     /** Start registration. */
     returndummy = elastices[ i ]->Run( argMap, parameterMaps[ i ] );
@@ -346,10 +345,10 @@ ELASTIX::RegisterImages(
     fixedImageOriginalDirection = elastices[ i ]->GetOriginalFixedImageDirectionFlat();
 
     /** Stop timer and print it. */
-    timer->StopTimer();
-    elxout << "\nCurrent time: " << timer->PrintStopTime() << "." << std::endl;
+    timer.Stop();
+    elxout << "\nCurrent time: " << GetCurrentDateAndTime() << "." << std::endl;
     elxout << "Time used for running elastix with this parameter file: "
-           << timer->PrintElapsedTimeDHMS() << ".\n" << std::endl;
+           << ConvertSecondsToDHMS( timer.GetMean(), 1 ) << ".\n" << std::endl;
 
     /** Get the transformation parameter map. */
     this->m_TransformParametersList.push_back( elastices[ i ]->GetTransformParametersMap() );
@@ -372,9 +371,9 @@ ELASTIX::RegisterImages(
          << "\n" << std::endl;
 
   /** Stop totaltimer and print it. */
-  totaltimer->StopTimer();
-  elxout << "Total time elapsed: " << totaltimer->PrintElapsedTimeDHMS()
-         << ".\n" << std::endl;
+  totaltimer.Stop();
+  elxout << "Total time elapsed: "
+    << ConvertSecondsToDHMS( totaltimer.GetMean(), 1 ) << ".\n" << std::endl;
 
   /************************************************************************
    *                                *
@@ -412,6 +411,60 @@ ELASTIX::RegisterImages(
 
 } // end RegisterImages()
 
+/** ConvertSecondsToDHMS
+ *
+ */
+std::string ELASTIX::ConvertSecondsToDHMS( const double totalSeconds, const unsigned int precision )
+{
+  /** Define days, hours, minutes. */
+  const std::size_t secondsPerMinute = 60;
+  const std::size_t secondsPerHour   = 60 * secondsPerMinute;
+  const std::size_t secondsPerDay    = 24 * secondsPerHour;
+
+  /** Convert total seconds. */
+  std::size_t iSeconds = static_cast<std::size_t>( totalSeconds );
+  const std::size_t days = iSeconds / secondsPerDay;
+
+  iSeconds %= secondsPerDay;
+  const std::size_t hours = iSeconds / secondsPerHour;
+
+  iSeconds %= secondsPerHour;
+  const std::size_t minutes = iSeconds / secondsPerMinute;
+
+  //iSeconds %= secondsPerMinute;
+  //const std::size_t seconds = iSeconds;
+  const double dSeconds = fmod( totalSeconds, 60.0 );
+
+  /** Create a string in days, hours, minutes and seconds. */
+  bool nonzero = false;
+  std::ostringstream make_string( "" );
+  if( days    != 0            ){ make_string << days    << "d"; nonzero = true; }
+  if( hours   != 0 || nonzero ){ make_string << hours   << "h"; nonzero = true; }
+  if( minutes != 0 || nonzero ){ make_string << minutes << "m"; nonzero = true; }
+  make_string << std::showpoint << std::fixed << std::setprecision( precision );
+  make_string << dSeconds << "s";
+
+  /** Return a value. */
+  return make_string.str();
+
+} // end ConvertSecondsToDHMS()
+
+
+/** Returns current date and time as a string. */
+std::string ELASTIX::GetCurrentDateAndTime( void )
+{
+  // Obtain current time
+  time_t rawtime = time( NULL );
+  // Convert to local time
+  struct tm * timeinfo = localtime( &rawtime );
+  // Convert to human-readable format
+  std::string timeAsString = std::string( asctime( timeinfo ) );
+  // Erase newline character at end
+  timeAsString.erase( timeAsString.end() - 1 );
+  //timeAsString.pop_back() // c++11 feature
+
+  return timeAsString;
+} // end GetCurrentDateAndTime()
 
 } // end namespace elastix
 

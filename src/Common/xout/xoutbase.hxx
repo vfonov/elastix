@@ -107,11 +107,8 @@ xoutbase< charT, traits >::AddTargetCell( const char * name, ostream_type * cell
   }
   else
   {
-    if( this->m_CTargetCells.count( name ) == 0 )
-    {
-      this->m_CTargetCells.insert( CStreamMapEntryType( name, cell ) );
-      returndummy = 0;
-    }
+    this->m_CTargetCells.insert( CStreamMapEntryType( name, cell ) );
+    returndummy = 0;
   }
 
   return returndummy;
@@ -136,11 +133,8 @@ xoutbase< charT, traits >::AddTargetCell( const char * name, Self * cell )
   }
   else
   {
-    if( this->m_XTargetCells.count( name ) == 0 )
-    {
-      this->m_XTargetCells.insert( XStreamMapEntryType( name, cell ) );
-      returndummy = 0;
-    }
+    this->m_XTargetCells.insert( XStreamMapEntryType( name, cell ) );
+    returndummy = 0;
   }
 
   return returndummy;
@@ -216,11 +210,8 @@ xoutbase< charT, traits >::AddOutput( const char * name, ostream_type * output )
   }
   else
   {
-    if( this->m_COutputs.count( name ) == 0 )
-    {
-      this->m_COutputs.insert( CStreamMapEntryType( name, output ) );
-      returndummy = 0;
-    }
+    this->m_COutputs.insert( CStreamMapEntryType( name, output ) );
+    returndummy = 0;
   }
 
   return returndummy;
@@ -244,11 +235,8 @@ xoutbase< charT, traits >::AddOutput( const char * name, Self * output )
   }
   else
   {
-    if( this->m_XOutputs.count( name ) == 0 )
-    {
-      this->m_XOutputs.insert( XStreamMapEntryType( name, output ) );
-      returndummy = 0;
-    }
+    this->m_XOutputs.insert( XStreamMapEntryType( name, output ) );
+    returndummy = 0;
   }
 
   return returndummy;

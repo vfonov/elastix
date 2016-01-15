@@ -16,6 +16,6 @@
  *
  *=========================================================================*/
 
-#include "elxCUDAResampler.h"
+#include "elxPCAMetric.h"
 
-elxInstallMacro( CUDAResampler );
+elxInstallMacro( PCAMetric );

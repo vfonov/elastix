@@ -123,6 +123,7 @@ xoutSetup( const char * logfilename, bool setupLogging, bool setupCout )
 } // end xoutSetup()
 
 
+
 /**
  * ********************* Constructor ****************************
  */
@@ -287,7 +288,17 @@ ElastixMain::Run( void )
 #ifdef ELASTIX_USE_OPENCL
   std::string errorMessage = "";
   bool errorCreatingContext = itk::CreateOpenCLContext( errorMessage );
-  if( errorCreatingContext ){ elxout << errorMessage << std::endl; }
+  if( errorCreatingContext )
+  {
+    /** Report and disable the GPU by releasing the context. */
+    elxout << errorMessage << std::endl;
+    elxout << "OpenCL processing is disabled." << std::endl;
+
+    itk::OpenCLContext::Pointer context = itk::OpenCLContext::GetInstance();
+    context->Release();
+  }
+
+  /** Create a log file. */
   itk::CreateOpenCLLogger( "elastix", this->m_Configuration->GetCommandLineArgument( "-out" ) );
 #endif
 
@@ -464,13 +475,23 @@ ElastixMain::InitDBIndex( void )
     if( this->m_FixedImageDimension == 0 )
     {
 #ifndef _ELASTIX_BUILD_LIBRARY
-      /** Read it from the fixed image header. */
+      /** Get the fixed image file name. */
       std::string fixedImageFileName
         = this->m_Configuration->GetCommandLineArgument( "-f" );
       if( fixedImageFileName == "" )
       {
         fixedImageFileName = this->m_Configuration->GetCommandLineArgument( "-f0" );
       }
+
+      /** Sanity check. */
+      if( fixedImageFileName == "" )
+      {
+        xout[ "error" ] << "ERROR: could not read fixed image." << std::endl;
+        xout[ "error" ] << "  both -f and -f0 are unspecified" << std::endl;
+        return 1;
+      }
+
+      /** Read it from the fixed image header. */
       try
       {
         this->GetImageInformationFromFile( fixedImageFileName,
@@ -532,13 +553,23 @@ ElastixMain::InitDBIndex( void )
     if( this->m_MovingImageDimension == 0 )
     {
 #ifndef _ELASTIX_BUILD_LIBRARY
-      /** Read it from the moving image header. */
+      /** Get the moving image file name. */
       std::string movingImageFileName
         = this->m_Configuration->GetCommandLineArgument( "-m" );
       if( movingImageFileName == "" )
       {
         movingImageFileName = this->m_Configuration->GetCommandLineArgument( "-m0" );
       }
+
+      /** Sanity check. */
+      if( movingImageFileName == "" )
+      {
+        xout[ "error" ] << "ERROR: could not read moving image." << std::endl;
+        xout[ "error" ] << "  both -m and -m0 are unspecified" << std::endl;
+        return 1;
+      }
+
+      /** Read it from the moving image header. */
       try
       {
         this->GetImageInformationFromFile( movingImageFileName,

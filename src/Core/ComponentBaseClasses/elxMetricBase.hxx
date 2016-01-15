@@ -122,21 +122,57 @@ MetricBase< TElastix >
       thisAsAdvanced->SetRequiredRatioOfValidSamples( ratio );
     }
 
-    /** Temporary?: Use the multi-threaded version or not. Default true. */
-    std::string tmp = this->m_Configuration->GetCommandLineArgument( "-mtm" ); // mtm: multi-threaded metrics
-    if( tmp == "true" || tmp == "" )
+    /** Set moving image derivative scales. */
+    std::size_t usescales = this->GetConfiguration()
+      ->CountNumberOfParameterEntries( "MovingImageDerivativeScales" );
+    if( usescales == 0 )
     {
-      thisAsAdvanced->SetUseMultiThread( true );
-      std::string  tmp2        = this->m_Configuration->GetCommandLineArgument( "-threads" );
-      unsigned int nrOfThreads = atoi( tmp2.c_str() );
-      if( tmp2 != "" )
+      thisAsAdvanced->SetUseMovingImageDerivativeScales( false );
+      thisAsAdvanced->SetScaleGradientWithRespectToMovingImageOrientation( false );
+    }
+    else
+    {
+      thisAsAdvanced->SetUseMovingImageDerivativeScales( true );
+
+      /** Read the scales from the parameter file. */
+      MovingImageDerivativeScalesType movingImageDerivativeScales;
+      for( unsigned int i = 0; i < MovingImageDimension; ++i )
       {
+        this->GetConfiguration()->ReadParameter(
+          movingImageDerivativeScales[ i ], "MovingImageDerivativeScales",
+          this->GetComponentLabel(), i, -1, false );
+      }
+
+      /** Set and report. */
+      thisAsAdvanced->SetMovingImageDerivativeScales( movingImageDerivativeScales );
+      elxout << "Multiplying moving image derivatives by: "
+        << movingImageDerivativeScales << std::endl;
+
+      /** Check if the scales are applied taking into account the moving image orientation. */
+      bool wrtMoving = false;
+      this->GetConfiguration()->ReadParameter(
+        wrtMoving, "ScaleGradientWithRespectToMovingImageOrientation",
+        this->GetComponentLabel(), level, false );
+      thisAsAdvanced->SetScaleGradientWithRespectToMovingImageOrientation( wrtMoving );
+    }
+
+    /** Should the metric use multi-threading? */
+    bool useMultiThreading = true;
+    this->GetConfiguration()->ReadParameter( useMultiThreading,
+      "UseMultiThreadingForMetrics", this->GetComponentLabel(), level, 0 );
+
+    thisAsAdvanced->SetUseMultiThread( useMultiThreading );
+    if( useMultiThreading )
+    {
+      std::string tmp = this->m_Configuration->GetCommandLineArgument( "-threads" );
+      if( tmp != "" )
+      {
+        const unsigned int nrOfThreads = atoi( tmp.c_str() );
         thisAsAdvanced->SetNumberOfThreads( nrOfThreads );
       }
     }
-    else { thisAsAdvanced->SetUseMultiThread( false ); }
 
-  } // end Advanced metric
+  } // end advanced metric
 
 } // end BeforeEachResolutionBase()
 

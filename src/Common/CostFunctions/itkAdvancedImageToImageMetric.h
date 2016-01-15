@@ -232,13 +232,17 @@ public:
 
   /** You may specify a scaling vector for the moving image derivatives.
    * If the UseMovingImageDerivativeScales is true, the moving image derivatives
-   * are multiplied by the moving image derivative scales (elementwise)
+   * are multiplied by the moving image derivative scales (element-wise)
    * You may use this to avoid deformations in the z-dimension, for example,
    * by setting the moving image derivative scales to (1,1,0).
    * This is a rather experimental feature. In most cases you do not need it.
    */
   itkSetMacro( UseMovingImageDerivativeScales, bool );
   itkGetConstMacro( UseMovingImageDerivativeScales, bool );
+
+  itkSetMacro( ScaleGradientWithRespectToMovingImageOrientation, bool );
+  itkGetConstMacro( ScaleGradientWithRespectToMovingImageOrientation, bool );
+
   itkSetMacro( MovingImageDerivativeScales, MovingImageDerivativeScalesType );
   itkGetConstReferenceMacro( MovingImageDerivativeScales, MovingImageDerivativeScalesType );
 
@@ -359,6 +363,18 @@ protected:
 
   /** Multi-threaded metric computation. */
 
+  /** Multi-threaded version of GetValue(). */
+  virtual inline void ThreadedGetValue( ThreadIdType threadID ){}
+
+  /** Finalize multi-threaded metric computation. */
+  virtual inline void AfterThreadedGetValue( MeasureType & value ) const {}
+
+  /** GetValue threader callback function. */
+  static ITK_THREAD_RETURN_TYPE GetValueThreaderCallback( void * arg );
+
+  /** Launch MultiThread GetValue. */
+  void LaunchGetValueThreaderCallback( void ) const;
+
   /** Multi-threaded version of GetValueAndDerivative(). */
   virtual inline void ThreadedGetValueAndDerivative(
     ThreadIdType threadID ){}
@@ -370,7 +386,7 @@ protected:
   /** GetValueAndDerivative threader callback function. */
   static ITK_THREAD_RETURN_TYPE GetValueAndDerivativeThreaderCallback( void * arg );
 
-  /** Launch MultiThread GetValueAndDerivative */
+  /** Launch MultiThread GetValueAndDerivative. */
   void LaunchGetValueAndDerivativeThreaderCallback( void ) const;
 
   /** AccumulateDerivatives threader callback function. */
@@ -402,6 +418,19 @@ protected:
    * is const, also InitializeThreadingParameters should be const, and therefore
    * these member variables are mutable.
    */
+
+  // test per thread struct with padding and alignment
+  struct GetValuePerThreadStruct
+  {
+    SizeValueType         st_NumberOfPixelsCounted;
+    MeasureType           st_Value;
+  };
+  itkPadStruct( ITK_CACHE_LINE_ALIGNMENT, GetValuePerThreadStruct,
+    PaddedGetValuePerThreadStruct );
+  itkAlignedTypedef( ITK_CACHE_LINE_ALIGNMENT, PaddedGetValuePerThreadStruct,
+    AlignedGetValuePerThreadStruct );
+  mutable AlignedGetValuePerThreadStruct * m_GetValuePerThreadVariables;
+  mutable ThreadIdType                     m_GetValuePerThreadVariablesSize;
 
   // test per thread struct with padding and alignment
   struct GetValueAndDerivativePerThreadStruct
@@ -528,13 +557,15 @@ private:
   void operator=( const Self & );             // purposely not implemented
 
   /** Private member variables. */
-  bool                            m_UseImageSampler;
-  double                          m_FixedLimitRangeRatio;
-  double                          m_MovingLimitRangeRatio;
-  bool                            m_UseFixedImageLimiter;
-  bool                            m_UseMovingImageLimiter;
-  double                          m_RequiredRatioOfValidSamples;
-  bool                            m_UseMovingImageDerivativeScales;
+  bool   m_UseImageSampler;
+  double m_FixedLimitRangeRatio;
+  double m_MovingLimitRangeRatio;
+  bool   m_UseFixedImageLimiter;
+  bool   m_UseMovingImageLimiter;
+  double m_RequiredRatioOfValidSamples;
+  bool   m_UseMovingImageDerivativeScales;
+  bool   m_ScaleGradientWithRespectToMovingImageOrientation;
+
   MovingImageDerivativeScalesType m_MovingImageDerivativeScales;
 
 };
