@@ -123,6 +123,7 @@ xoutSetup( const char * logfilename, bool setupLogging, bool setupCout )
 } // end xoutSetup()
 
 
+
 /**
  * ********************* Constructor ****************************
  */

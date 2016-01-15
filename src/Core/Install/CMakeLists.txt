@@ -6,20 +6,29 @@
 
 # User specified variables:
 mark_as_advanced( ELASTIX_IMAGE_DIMENSIONS )
-set( ELASTIX_IMAGE_DIMENSIONS 2 3 4
-  CACHE STRING "Specify image dimensions" )
+if( NOT ELASTIX_IMAGE_DIMENSIONS )
+  set( ELASTIX_IMAGE_DIMENSIONS 2 3 4 CACHE STRING "Specify image dimensions" )
+endif()
 
 mark_as_advanced( ELASTIX_IMAGE_2D_PIXELTYPES )
-set( ELASTIX_IMAGE_2D_PIXELTYPES "float"
-  CACHE STRING "Specify 2D pixel types" )
+if( NOT ELASTIX_IMAGE_2D_PIXELTYPES )
+  set( ELASTIX_IMAGE_2D_PIXELTYPES "float" CACHE STRING "Specify 2D pixel types" )
+endif()
 
 mark_as_advanced( ELASTIX_IMAGE_3D_PIXELTYPES )
-set( ELASTIX_IMAGE_3D_PIXELTYPES "short" "float"
-  CACHE STRING "Specify 3D pixel types" )
+if( NOT ELASTIX_IMAGE_3D_PIXELTYPES )
+  set( ELASTIX_IMAGE_3D_PIXELTYPES "short" "float" CACHE STRING "Specify 3D pixel types" )
+endif()
 
 mark_as_advanced( ELASTIX_IMAGE_4D_PIXELTYPES )
-set( ELASTIX_IMAGE_4D_PIXELTYPES "short"
-  CACHE STRING "Specify 4D pixel types" )
+if( NOT ELASTIX_IMAGE_4D_PIXELTYPES )
+  set( ELASTIX_IMAGE_4D_PIXELTYPES "short" CACHE STRING "Specify 4D pixel types" )
+endif()
+
+mark_as_advanced( USE_ALL_PIXELTYPES )
+if( NOT USE_ALL_PIXELTYPES )
+ option( USE_ALL_PIXELTYPES "Build all pixel types" OFF )
+endif()
 
 # Define supported dimensions and types for sanity checks.
 # Gives protection against typo's.
@@ -27,6 +36,12 @@ set( supportedDimensions 2 3 4 )
 set( supportedTypes "char" "unsigned char"
   "short" "unsigned short" "int" "unsigned int"
   "long" "unsigned long" "float" "double" )
+
+if( ${USE_ALL_PIXELTYPES} )
+  set( ELASTIX_IMAGE_2D_PIXELTYPES ${supportedTypes} )
+  set( ELASTIX_IMAGE_3D_PIXELTYPES ${supportedTypes} )
+  set( ELASTIX_IMAGE_4D_PIXELTYPES ${supportedTypes} )
+endif()
 
 # Sanity check if > 0 number of dimensions are requested
 list( LENGTH ELASTIX_IMAGE_DIMENSIONS numDims )
