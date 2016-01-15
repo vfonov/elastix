@@ -146,6 +146,11 @@ public:
   typedef typename Superclass
     ::JacobianOfSpatialHessianType JacobianOfSpatialHessianType;
   typedef typename Superclass::InternalMatrixType InternalMatrixType;
+  
+  typedef typename Superclass::TransformType        TransformType;
+  typedef typename Superclass::TransformTypePointer TransformTypePointer;
+  typedef typename Superclass::TransformTypeConstPointer TransformTypeConstPointer;
+  
 
   /** Standard matrix type for this class. */
   typedef Matrix< TScalarType,
@@ -161,6 +166,7 @@ public:
   typedef InputPointType   CenterType;
   typedef OutputVectorType OffsetType;
   typedef OutputVectorType TranslationType;
+
 
   /** Set the transformation to an Identity
    * This sets the matrix to identity and the Offset to null.
@@ -436,6 +442,10 @@ public:
     SpatialHessianType & sh,
     JacobianOfSpatialHessianType & jsh,
     NonZeroJacobianIndicesType & nonZeroJacobianIndices ) const;
+    
+    
+  virtual TransformTypePointer GetITKCompatibleTransform() const;
+
 
 protected:
 

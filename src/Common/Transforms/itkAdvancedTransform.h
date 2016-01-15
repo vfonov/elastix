@@ -309,6 +309,11 @@ public:
     SpatialHessianType & sh,
     JacobianOfSpatialHessianType & jsh,
     NonZeroJacobianIndicesType & nonZeroJacobianIndices ) const = 0;
+    
+  /**
+   * Convert transform into a standard ITK object , for interoperability only
+   */
+  virtual TransformTypePointer GetITKCompatibleTransform() const ;
 
 protected:
 

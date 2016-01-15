@@ -71,15 +71,17 @@ main( int argc, char ** argv )
   bool            outFolderPresent = false;
   std::string     outFolder        = "";
   std::string     logFileName      = "";
+  bool            quiet_mode       = false;
 
   /** Put command line parameters into parameterFileList. */
-  for( unsigned int i = 1; static_cast< long >( i ) < argc - 1; i += 2 )
+  for( unsigned int i = 1; static_cast< long >( i ) < argc ; )
   {
-    std::string key( argv[ i ] );
-    std::string value( argv[ i + 1 ] );
+    std::string key( argv[ i++ ] );
+    std::string value;
 
     if( key == "-out" )
     {
+      value = argv [ i++ ];
       /** Make sure that last character of the output folder equals a '/' or '\'. */
       const char last = value[ value.size() - 1 ];
       if( last != '/' && last != '\\' ) { value.append( "/" ); }
@@ -98,22 +100,36 @@ main( int argc, char ** argv )
       /** Save this information. */
       outFolderPresent = true;
       outFolder        = value;
+      
+      argMap.insert( ArgumentMapEntryType( key.c_str(), value.c_str() ) );
 
     } // end if key == "-out"
-
-    /** Attempt to save the arguments in the ArgumentMap. */
-    if( argMap.count( key ) == 0 )
+    else if( key == "-q" || key == "--quiet" ) 
     {
-      argMap.insert( ArgumentMapEntryType( key.c_str(), value.c_str() ) );
-    }
-    else
+      argMap.insert( ArgumentMapEntryType( "-q", "on" ) );
+      quiet_mode = true;
+    } 
+    else if( key == "-v" || key == "--verbose" ) 
     {
-      /** Duplicate arguments. */
-      std::cerr << "WARNING!" << std::endl;
-      std::cerr << "Argument " << key.c_str() << "is only required once." << std::endl;
-      std::cerr << "Arguments " << key.c_str() << " " << value.c_str() << "are ignored" << std::endl;
+      argMap.insert( ArgumentMapEntryType( "-q", "off" ) );
     }
-
+    else 
+    {
+      value = argv [ i++ ];
+      
+      /** Attempt to save the arguments in the ArgumentMap. */
+      if( argMap.count( key ) == 0 )
+      {
+        argMap.insert( ArgumentMapEntryType( key.c_str(), value.c_str() ) );
+      }
+      else
+      {
+        /** Duplicate arguments. */
+        std::cerr << "WARNING!" << std::endl;
+        std::cerr << "Argument " << key.c_str() << "is only required once." << std::endl;
+        std::cerr << "Arguments " << key.c_str() << " " << value.c_str() << "are ignored" << std::endl;
+      }
+    }
   } // end for loop
 
   /** The argv0 argument, required for finding the component.dll/so's. */
@@ -127,11 +143,13 @@ main( int argc, char ** argv )
   }
 
   /** Check that at least one of the following options is given. */
-  if( argMap.count( "-in" ) == 0
+  if(  argMap.count( "-in" ) == 0
     && argMap.count( "-ipp" ) == 0
     && argMap.count( "-def" ) == 0
     && argMap.count( "-jac" ) == 0
-    && argMap.count( "-jacmat" ) == 0 )
+    && argMap.count( "-jacmat" ) == 0
+    && argMap.count( "-xfm") == 0 
+     )
   {
     std::cerr << "ERROR: At least one of the CommandLine options \"-in\", "
               << "\"-def\", \"-jac\", or \"-jacmat\" should be given!" << std::endl;
@@ -153,7 +171,7 @@ main( int argc, char ** argv )
     {
       /** Setup xout. */
       logFileName = argMap[ "-out" ] + "transformix.log";
-      int returndummy2 = elx::xoutSetup( logFileName.c_str(), true, true );
+      int returndummy2 = elx::xoutSetup( logFileName.c_str(), true, !quiet_mode );
       if( returndummy2 )
       {
         std::cerr << "ERROR while setting up xout." << std::endl;
@@ -274,6 +292,12 @@ PrintHelp( void )
   std::cout << "\nAt least one of the options \"-in\", \"-def\", \"-jac\", or \"-jacmat\" should be given.\n"
             << std::endl;
 
+  std::cout << "Optional extra commands by VF:"<<std::endl;
+  std::cout << " -q/--quiet Don't display progress and system information" << std::endl;
+  std::cout << " -sub <f>   subsample deformation field and jacobian by this factor" << std::endl;
+  std::cout << " -xfm output  Output transformation either deformation field "<< std::endl<<
+               "              if -def is specified, or store parameters directly" << std::endl;
+  
   /** The parameter file. */
   std::cout << "The transform-parameter file must contain all the information "
     "necessary for transformix to run properly. That includes which transform "

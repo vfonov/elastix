@@ -272,6 +272,9 @@ public:
   /** Function to write transform-parameters to a file. */
   virtual void WriteToFile( void ) const;
 
+  /** Function to write transform-parameters to a ITK transform file. */
+  virtual void WriteToITKFile( const char *fname ) ;
+  
   /** Macro for reading and writing the transform parameters in WriteToFile or not. */
   virtual void SetReadWriteTransformParameters( const bool _arg );
 
