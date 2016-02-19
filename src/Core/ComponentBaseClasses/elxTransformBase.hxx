@@ -1126,7 +1126,8 @@ TransformBase< TElastix >
   if( def == "" && xfm != "")
   {
     //silently setting this option
-    def = "all";
+    //def = "all";
+    // VF: TODO figure out when we actually need deformation?
   }
 
   /** If there is an input point-file? */
