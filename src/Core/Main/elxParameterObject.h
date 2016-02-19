@@ -37,6 +37,7 @@ public:
   typedef std::string                                             ParameterKeyType;
   typedef std::string                                             ParameterValueType;
   typedef std::vector< ParameterValueType >                       ParameterValueVectorType;
+  typedef ParameterValueVectorType::iterator                      ParameterValueVectorIterator;
   typedef std::map< ParameterKeyType, ParameterValueVectorType >  ParameterMapType;
   typedef ParameterMapType::iterator                              ParameterMapIterator;
   typedef ParameterMapType::const_iterator                        ParameterMapConstIterator;
@@ -60,7 +61,7 @@ public:
   void ReadParameterFile( const ParameterFileNameType parameterFileName );
   void ReadParameterFile( const ParameterFileNameVectorType parameterFileNameVector );
   void AddParameterFile( const ParameterFileNameType parameterFileName );
-
+  
   void WriteParameterFile( const ParameterMapType parameterMap, const ParameterFileNameType parameterFileName );
   void WriteParameterFile( const ParameterFileNameType parameterFileName );
   void WriteParameterFile( const ParameterFileNameVectorType parameterFileNameVector );
@@ -72,7 +73,7 @@ public:
 
   // C++11 has a to_string in the standard library, but it is undesirable to
   // introduce a C++11 dependency for a simple number to string helper function
-  template < typename T >
+  template< typename T >
   static std::string ToString( const T& n )
   {
     std::ostringstream stm;

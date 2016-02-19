@@ -18,11 +18,15 @@
 #ifndef elxParameterObject_cxx
 #define elxParameterObject_cxx
 
-#include "itkFileTools.h"
-
 #include "elxParameterObject.h"
 
-namespace elastix {
+#include "itkFileTools.h"
+#include <fstream>
+#include <iostream>
+
+
+namespace elastix
+{
 
 void
 ParameterObject
@@ -119,34 +123,59 @@ ParameterObject
 ::WriteParameterFile( const ParameterMapType parameterMap, const ParameterFileNameType parameterFileName )
 {
   std::ofstream parameterFile;
+  parameterFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
   parameterFile << std::fixed;
-  parameterFile.open( parameterFileName.c_str(), std::ofstream::out );
-  ParameterMapConstIterator parameterMapIterator = parameterMap.begin();
-  ParameterMapConstIterator parameterMapIteratorEnd = parameterMap.end();
-  while( parameterMapIterator != parameterMapIteratorEnd )
+
+  try
   {
-    parameterFile << "(" << parameterMapIterator->first;
-
-    ParameterValueVectorType parameterMapValueVector = parameterMapIterator->second;
-    for( unsigned int i = 0; i < parameterMapValueVector.size(); ++i )
-    {
-      std::stringstream stream( parameterMapValueVector[ i ] );
-      float number;
-      stream >> number;
-      if( stream.fail() || stream.bad() ) {
-         parameterFile << " \"" << parameterMapValueVector[ i ] << "\"";
-      }
-      else
-      {
-        parameterFile << " " << number;
-      }
-    }
-
-    parameterFile << ")" << std::endl;
-    parameterMapIterator++;
+    parameterFile.open( parameterFileName.c_str(), std::ofstream::out );
+  }
+  catch( std::ofstream::failure e )
+  {
+    itkExceptionMacro( "Error opening parameter file: " << e.what() );
   }
 
-  parameterFile.close();
+  try
+  {
+    ParameterMapConstIterator parameterMapIterator = parameterMap.begin();
+    ParameterMapConstIterator parameterMapIteratorEnd = parameterMap.end();
+    while( parameterMapIterator != parameterMapIteratorEnd )
+    {
+      parameterFile << "(" << parameterMapIterator->first;
+
+      ParameterValueVectorType parameterMapValueVector = parameterMapIterator->second;
+      for( unsigned int i = 0; i < parameterMapValueVector.size(); ++i )
+      {
+        std::stringstream stream( parameterMapValueVector[ i ] );
+        float number;
+        stream >> number;
+        if( stream.fail() || stream.bad() )
+        {
+          parameterFile << " \"" << parameterMapValueVector[ i ] << "\"";
+        }
+        else
+        {
+          parameterFile << " " << number;
+        }
+      }
+
+      parameterFile << ")" << std::endl;
+      parameterMapIterator++;
+    }
+  }
+  catch( std::stringstream::failure e )
+  {
+    itkExceptionMacro( "Error writing to paramter file: " << e.what() );
+  }
+
+  try
+  {
+    parameterFile.close();
+  }
+  catch( std::ofstream::failure e )
+  {
+    itkExceptionMacro( "Error closing parameter file:" << e.what() );
+  }
 }
 
 void
@@ -234,7 +263,7 @@ ParameterObject
   if( transformName == "translation" )
   {
     parameterMap[ "Registration" ]                     = ParameterValueVectorType( 1, "MultiResolutionRegistration" );
-    parameterMap[ "transform" ]                        = ParameterValueVectorType( 1, "TranslationTransform" );
+    parameterMap[ "Transform" ]                        = ParameterValueVectorType( 1, "TranslationTransform" );
     parameterMap[ "Metric" ]                           = ParameterValueVectorType( 1, "AdvancedMattesMutualInformation" );
     parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "256" );
     parameterMap[ "AutomaticTransformInitialization" ] = ParameterValueVectorType( 1, "true" );
@@ -254,14 +283,14 @@ ParameterObject
     parameterMap[ "Metric" ]                           = ParameterValueVectorType( 1, "AdvancedMattesMutualInformation" );
     parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "512" );
   }
-  else if( transformName == "nonrigid" )
+  else if( transformName == "bspline" || transformName == "nonrigid" ) // <-- nonrigid for backwards compatibility
   {
     parameterMap[ "Registration" ]                     = ParameterValueVectorType( 1, "MultiMetricMultiResolutionRegistration" );
     parameterMap[ "Transform" ]                        = ParameterValueVectorType( 1, "BSplineTransform" );
     parameterMap[ "Metric" ]                           = ParameterValueVectorType( 1, "AdvancedMattesMutualInformation" );
     parameterMap[ "Metric" ].push_back( "TransformBendingEnergyPenalty" );
-    parameterMap[ "Metric0Weight" ]                    = ParameterValueVectorType( 1, "0.0001" );
-    parameterMap[ "Metric1Weight" ]                    = ParameterValueVectorType( 1, "0.9999" );
+    parameterMap[ "Metric0Weight" ]                    = ParameterValueVectorType( 1, "1.0" );
+    parameterMap[ "Metric1Weight" ]                    = ParameterValueVectorType( 1, "10000.0" );
     parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "512" );
   }
   else if( transformName == "groupwise" )
@@ -297,3 +326,33 @@ ParameterObject
 } // namespace elastix
 
 #endif // elxParameterObject_cxx
+
+// http://stackoverflow.com/questions/9670396/exception-handling-and-opening-a-file
+// TODO: Implement exception handling for parameter file reader/writer, rethrow itk exception
+// int main () {
+//   ifstream file;
+//   file.exceptions ( ifstream::failbit | ifstream::badbit );
+//   try {
+//     file.open ("test.txt");
+//     while (!file.eof()) file.get();
+//   }
+//   catch ( ifstream::failure e ) {
+//     cout << "Exception opening/reading file";
+//   }
+//   file.close();
+//   return 0;
+// }
+
+// int main () {
+//   ofstream file;
+//   file.exceptions ( ofstream::failbit | ofstream::badbit | ofstream::failure );
+//   try {
+//     file.open ("test.txt");
+//     while (!file.eof()) file.get();
+//   }
+//   catch (ifstream::failure e) {
+//     cout << "Exception opening/reading file";
+//   }
+//   file.close();
+//   return 0;
+// }

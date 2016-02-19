@@ -18,7 +18,7 @@
 #ifndef elxElastixFilter_h
 #define elxElastixFilter_h
 
-#include "itkImageSource.h"
+#include "itkImageToImageFilter.h"
 
 #include "elxElastixMain.h"
 #include "elxParameterObject.h"
@@ -31,9 +31,8 @@
 namespace elastix
 {
 
-template< typename TFixedImage,
-          typename TMovingImage >
-class ElastixFilter : public itk::ImageSource< TFixedImage >
+template< typename TFixedImage, typename TMovingImage >
+class ElastixFilter : public itk::ImageToImageFilter< TFixedImage, TFixedImage >
 {
 public:
 
@@ -41,7 +40,7 @@ public:
   typedef itk::SmartPointer< Self >       Pointer;
   typedef itk::SmartPointer< const Self > ConstPointer;
   itkNewMacro( Self );
-  itkTypeMacro( Self, itk::ImageSource );
+  itkTypeMacro( Self, itk::ImageToImageFilter );
 
   typedef elastix::ElastixMain                                ElastixMainType;
   typedef ElastixMainType::Pointer                            ElastixMainPointer;
@@ -53,13 +52,12 @@ public:
   typedef ElastixMainType::ArgumentMapType                    ArgumentMapType;
   typedef ArgumentMapType::value_type                         ArgumentMapEntryType;
 
-  typedef itk::ProcessObject::DataObjectIdentifierType        DataObjectIdentifierType;
-  typedef itk::ProcessObject::DataObjectPointerArraySizeType  DataObjectPointerArraySizeType;
-  typedef itk::ProcessObject::NameArray                       InputNameArrayType;
-
   typedef ElastixMainType::DataObjectContainerType            DataObjectContainerType;
   typedef ElastixMainType::DataObjectContainerPointer         DataObjectContainerPointer;
   typedef DataObjectContainerType::Iterator                   DataObjectContainerIterator;
+  typedef itk::ProcessObject::DataObjectIdentifierType        DataObjectIdentifierType;
+  typedef itk::ProcessObject::DataObjectPointerArraySizeType  DataObjectPointerArraySizeType;
+  typedef itk::ProcessObject::NameArray                       InputNameArrayType;
 
   typedef ParameterObject::ParameterMapType                   ParameterMapType;
   typedef ParameterObject::ParameterMapVectorType             ParameterMapVectorType;
@@ -93,8 +91,12 @@ public:
 
   void SetParameterObject( ParameterObjectPointer parameterObject );
   ParameterObjectPointer GetParameterObject( void );
-
   ParameterObjectPointer GetTransformParameterObject( void );
+
+  // TODO: Pass transform object instead of reading from disk
+  itkSetMacro( InitialTransformParameterFileName, std::string );
+  itkGetConstMacro( InitialTransformParameterFileName, std::string );
+  void RemoveInitialTransformParameterFileName( void ) { this->SetInitialTransformParameterFileName( std::string() ); };
 
   itkSetMacro( FixedPointSetFileName, std::string );
   itkGetConstMacro( FixedPointSetFileName, std::string );
@@ -112,7 +114,6 @@ public:
   {
     this->m_LogFileName = logFileName;
     this->LogToFileOn();
-    this->Modified();
   }
 
   itkGetConstMacro( LogFileName, std::string );
@@ -130,6 +131,9 @@ public:
   itkGetConstMacro( LogToFile, bool );
   itkBooleanMacro( LogToFile );
 
+  using itk::ProcessObject::GetInput;
+
+  // TODO: We should not have to override GetOutput from superclass. This is a bug.
   FixedImagePointer GetOutput( void );
 
 protected:
@@ -140,10 +144,13 @@ private:
 
   ElastixFilter();
 
-  void AddInputAutoIncrementName( DataObjectIdentifierType key, itk::DataObject* input );
+  void AddInputAndAutoIncrementName( DataObjectIdentifierType key, itk::DataObject* input );
 
   bool IsInputType( DataObjectIdentifierType inputType, DataObjectIdentifierType inputName );
   void RemoveInputType( DataObjectIdentifierType inputName );
+  bool IsEmpty( FixedImagePointer image );
+
+  void VerifyInputInformation( void ) ITK_OVERRIDE;
 
   // TODO: When set to true, ReleaseDataFlag should also touch these containers
   DataObjectContainerPointer m_FixedImageContainer;
@@ -151,6 +158,7 @@ private:
   DataObjectContainerPointer m_FixedMaskContainer;
   DataObjectContainerPointer m_MovingMaskContainer;
 
+  std::string m_InitialTransformParameterFileName;
   std::string m_FixedPointSetFileName;
   std::string m_MovingPointSetFileName;
 

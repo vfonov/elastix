@@ -7,6 +7,20 @@ set( TestBaselineDir ${elastix_SOURCE_DIR}/Testing/Baselines )
 set( TestOutputDir ${elastix_BINARY_DIR}/Testing )
 
 #---------------------------------------------------------------------
+# configure the baseline files
+set( ELASTIX_DATA_DIR ${TestDataDir} )
+file( GLOB files ${TestBaselineDir}/*.in )
+foreach( tpfile ${files} )
+  # Get file name without directory
+  get_filename_component( tpfileout ${tpfile} NAME )
+  # Strip extension .in
+  string( REGEX REPLACE "\\.[^.]*$" "" tpfileout ${tpfileout})
+  # Replace the initial transform directory with the correct one
+  # The resulting file can be found in the binary directory / Testing
+  configure_file( ${tpfile} ${elastix_BINARY_DIR}/Testing/${tpfileout} @ONLY )
+endforeach()
+
+#---------------------------------------------------------------------
 # Python is used by some tests
 find_program( python_executable python
   HINTS "C:/Program Files/Python2.7" "C:/Program Files/python3.3" )
@@ -269,7 +283,7 @@ macro( elx_add_run_test testbasename howtocompare )
 
   # To compare against a baseline TransformParameters file
   # Baselines have been generated on LKEB, PCMarius, Win7, 64 bit, VS2008
-  set( baselineTP ${TestBaselineDir}/TransformParameters_${testbasename}.txt )
+  set( baselineTP ${TestOutputDir}/TransformParameters_${testbasename}.txt )
   set( testTP ${output_dir}/TransformParameters.${countp}.txt )
 
   # Temporary hack to get some failing tests working
@@ -279,7 +293,7 @@ macro( elx_add_run_test testbasename howtocompare )
     if( ( SITE STREQUAL "LKEB.goliath" ) OR (SITE STREQUAL "LKEB.MacMini") OR (SITE STREQUAL "BIGR.cluster") OR (SITE STREQUAL "BIGR.PCStefan") )
       if( ${testbasename} STREQUAL "3DCT_lung.MI.bspline.ASGD.001"
         OR ${testbasename} STREQUAL "3DCT_lung.NMI.bspline.ASGD.001" )
-        set( baselineTP ${TestBaselineDir}/TransformParameters_${SITE}_${testbasename}.txt )
+        set( baselineTP ${TestOutputDir}/TransformParameters_${SITE}_${testbasename}.txt )
       endif()
     endif()
   endif()
