@@ -65,6 +65,7 @@ set_property( TARGET ANNlib PROPERTY FOLDER "libraries" )
 # Install
 if( WIN32 )
   install( TARGETS ANNlib
+    ARCHIVE DESTINATION .
     RUNTIME DESTINATION .
     LIBRARY DESTINATION . 
     ARCHIVE DESTINATION . 
@@ -72,6 +73,7 @@ if( WIN32 )
     #COMPONENT libraries )
 else()
   install( TARGETS ANNlib
+    ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib 
     ARCHIVE DESTINATION lib
