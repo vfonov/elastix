@@ -117,7 +117,7 @@ TransformBase< TElastix >
   /** Initialize. */
   this->m_TransformParametersPointer   = 0;
   this->m_ReadWriteTransformParameters = true;
-
+  this->m_Quiet = false;
 } // end Constructor()
 
 
@@ -1589,9 +1589,12 @@ TransformBase< TElastix >
   /** Track the progress of the generation of the deformation field. */
 #ifndef _ELASTIX_BUILD_LIBRARY
   typename ProgressCommandType::Pointer progressObserver = ProgressCommandType::New();
-  progressObserver->ConnectObserver( defGenerator );
-  progressObserver->SetStartString( "  Progress: " );
-  progressObserver->SetEndString( "%" );
+  if(!this->m_Quiet)
+  {
+    progressObserver->ConnectObserver( defGenerator );
+    progressObserver->SetStartString( "  Progress: " );
+    progressObserver->SetEndString( "%" );
+  }
 #endif
   try
   {
@@ -1737,9 +1740,12 @@ TransformBase< TElastix >
 #ifndef _ELASTIX_BUILD_LIBRARY
   /** Track the progress of the generation of the deformation field. */
   typename ProgressCommandType::Pointer progressObserver = ProgressCommandType::New();
-  progressObserver->ConnectObserver( jacGenerator );
-  progressObserver->SetStartString( "  Progress: " );
-  progressObserver->SetEndString( "%" );
+  if(!m_Quiet)
+  {
+    progressObserver->ConnectObserver( jacGenerator );
+    progressObserver->SetStartString( "  Progress: " );
+    progressObserver->SetEndString( "%" );
+  }
 #endif
   /** Create a name for the deformation field file. */
   std::string resultImageFormat = "mhd";
@@ -1840,9 +1846,12 @@ TransformBase< TElastix >
 #ifndef _ELASTIX_BUILD_LIBRARY
   /** Track the progress of the generation of the deformation field. */
   typename ProgressCommandType::Pointer progressObserver = ProgressCommandType::New();
-  progressObserver->ConnectObserver( jacGenerator );
-  progressObserver->SetStartString( "  Progress: " );
-  progressObserver->SetEndString( "%" );
+  if(!m_Quiet)
+  {
+    progressObserver->ConnectObserver( jacGenerator );
+    progressObserver->SetStartString( "  Progress: " );
+    progressObserver->SetEndString( "%" );
+  }
 #endif
   /** Create a name for the deformation field file. */
   std::string resultImageFormat = "mhd";

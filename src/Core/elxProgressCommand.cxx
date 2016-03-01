@@ -39,12 +39,15 @@ ProgressCommand::ProgressCommand()
   /** Check if the output of the stream is a console. */
   this->m_StreamOutputIsConsole = false;
   std::string streamOutput = "cout";
-  int         currentPos   = xl::xout[ "coutonly" ].GetCOutputs().find( streamOutput )->second->tellp();
-  if( currentPos == -1 )
+  xl::xoutbase_type::CStreamMapType::const_iterator stream_iterator = xl::xout[ "coutonly" ].GetCOutputs().find( streamOutput );
+  if(stream_iterator!=xl::xout[ "coutonly" ].GetCOutputs().end())
   {
-    this->m_StreamOutputIsConsole = true;
+    int         currentPos   = stream_iterator->second->tellp();
+    if( currentPos == -1 )
+    {
+      this->m_StreamOutputIsConsole = true;
+    }
   }
-
 }   // end Constructor()
 
 

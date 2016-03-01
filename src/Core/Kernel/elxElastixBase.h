@@ -359,6 +359,11 @@ public:
   /** Set configuration vector. Library only. */
   virtual void SetConfigurations( std::vector< ConfigurationPointer > & configurations ) = 0;
 
+  /** Set quiet mode */
+  virtual void SetQuiet(bool mode) {
+    this->m_Quiet=mode;
+  }
+
 protected:
 
   ElastixBase();
@@ -369,6 +374,9 @@ protected:
   ComponentDatabasePointer m_ComponentDatabase;
 
   FlatDirectionCosinesType m_OriginalFixedImageDirection;
+
+  /** Supress output of progress messages */
+  bool m_Quiet;
 
   /** Convenient mini class to load the files specified by a filename container
    * The function GenerateImageContainer can be used without instantiating an
@@ -537,6 +545,7 @@ private:
 
   /** Use or ignore direction cosines. */
   bool m_UseDirectionCosines;
+  
 
   /** Read a series of command line options that satisfy the following syntax:
    * {-f,-f0} \<filename0\> [-f1 \<filename1\> [ -f2 \<filename2\> ... ] ]

@@ -111,7 +111,9 @@ xoutSetup( const char * logfilename, bool setupLogging, bool setupCout )
   returndummy |= xout.AddTargetCell( "error", &g_ErrorXout );
   returndummy |= xout.AddTargetCell( "standard", &g_StandardXout );
   returndummy |= xout.AddTargetCell( "logonly", &g_LogOnlyXout );
-  returndummy |= xout.AddTargetCell( "coutonly", &g_CoutOnlyXout );
+  
+  if( setupCout )
+    returndummy |= xout.AddTargetCell( "coutonly", &g_CoutOnlyXout );
 
   /** Format the output. */
   xout[ "standard" ] << std::fixed;
@@ -154,6 +156,8 @@ ElastixMain::ElastixMain()
   this->m_FinalTransform   = 0;
   this->m_InitialTransform = 0;
   this->m_TransformParametersMap.clear();
+  
+  this->m_Quiet=false;
 
 } // end Constructor
 
@@ -303,6 +307,7 @@ ElastixMain::Run( void )
 #endif
 
   /** Set some information in the ElastixBase. */
+  this->GetElastixBase()->SetQuiet( this->m_Quiet );
   this->GetElastixBase()->SetConfiguration( this->m_Configuration );
   this->GetElastixBase()->SetComponentDatabase( this->s_CDB );
   this->GetElastixBase()->SetDBIndex( this->m_DBIndex );

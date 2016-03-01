@@ -466,7 +466,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
      * But for now, there seems to be no use yet for that.
      */
 #ifndef _ELASTIX_BUILD_LIBRARY
-    this->GetElxResamplerBase()->ResampleAndWriteResultImage( makeFileName.str().c_str() );
+    this->GetElxResamplerBase()->ResampleAndWriteResultImage( makeFileName.str().c_str(),!this->m_Quiet );
 #else
     this->GetElxResamplerBase()->CreateItkResultImage();
 #endif

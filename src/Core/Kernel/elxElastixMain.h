@@ -211,6 +211,9 @@ public:
    */
   itkSetObjectMacro( InitialTransform, ObjectType );
   itkGetObjectMacro( InitialTransform, ObjectType );
+  
+  itkGetMacro( Quiet, bool );
+  itkSetMacro( Quiet, bool );
 
   /** Set/Get the original fixed image direction as a flat array
    * (d11 d21 d31 d21 d22 etc ) */
@@ -302,6 +305,9 @@ protected:
    * pointer will be assigned to an ElastixTemplate<>.
    */
   ObjectPointer m_Elastix;
+  
+  /** Supress output of progress messages */
+  bool m_Quiet;
 
   /** The configuration object, containing the parameters and command-line arguments. */
   ConfigurationPointer m_Configuration;
