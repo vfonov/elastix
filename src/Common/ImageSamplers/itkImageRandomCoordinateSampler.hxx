@@ -15,9 +15,8 @@
  *  limitations under the License.
  *
  *=========================================================================*/
-
-#ifndef __ImageRandomCoordinateSampler_txx
-#define __ImageRandomCoordinateSampler_txx
+#ifndef __ImageRandomCoordinateSampler_hxx
+#define __ImageRandomCoordinateSampler_hxx
 
 #include "itkImageRandomCoordinateSampler.h"
 #include "vnl/vnl_math.h"
@@ -111,7 +110,7 @@ ImageRandomCoordinateSampler< TInputImage >
       /** Convert to point */
       inputImage->TransformContinuousIndexToPhysicalPoint( sampleContIndex, samplePoint );
 
-      /** Compute the value at the contindex. */
+      /** Compute the value at the continuous index. */
       sampleValue = static_cast< ImageSampleValueType >(
         this->m_Interpolator->EvaluateAtContinuousIndex( sampleContIndex ) );
 
@@ -324,9 +323,11 @@ ImageRandomCoordinateSampler< TInputImage >
     largestContIndex  = largestImageContIndex;
     return;
   }
+
   /** Convert sampleRegionSize to continuous index space and
    * compute the maximum allowed value for the smallestContIndex,
-   * such that a sampleregion of size SampleRegionSize still fits. */
+   * such that a sample region of size SampleRegionSize still fits.
+   */
   typedef typename InputImageContinuousIndexType::VectorType CIndexVectorType;
   CIndexVectorType              sampleRegionSize;
   InputImageContinuousIndexType maxSmallestContIndex;
@@ -335,9 +336,11 @@ ImageRandomCoordinateSampler< TInputImage >
     sampleRegionSize[ i ] = this->GetSampleRegionSize()[ i ]
       / this->GetInput()->GetSpacing()[ i ];
     maxSmallestContIndex[ i ] = largestImageContIndex[ i ] - sampleRegionSize[ i ];
-    /** make sure it is larger than the lower bound */
+
+    /** Make sure it is larger than the lower bound. */
     maxSmallestContIndex[ i ] = vnl_math_max( maxSmallestContIndex[ i ], smallestImageContIndex[ i ] );
   }
+
   this->GenerateRandomCoordinate( smallestImageContIndex, maxSmallestContIndex, smallestContIndex );
   largestContIndex  = smallestContIndex;
   largestContIndex += sampleRegionSize;
@@ -364,4 +367,4 @@ ImageRandomCoordinateSampler< TInputImage >
 
 } // end namespace itk
 
-#endif // end #ifndef __ImageRandomCoordinateSampler_txx
+#endif // end #ifndef __ImageRandomCoordinateSampler_hxx

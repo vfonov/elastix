@@ -27,7 +27,11 @@
 namespace elastix
 {
 
-class ELASTIXLIB_API ParameterObject : public itk::DataObject
+// TODO: Why does the compiler not see ELASTIXLIB_API declspec in elxMacro.h?
+//   error: variable has incomplete type 'class ELASTIXLIB_API'
+// with class ELASTIXLIB_API ParameterObject : public itk::DataObject
+
+class ParameterObject : public itk::DataObject
 {
 public:
   typedef ParameterObject                 Self;
@@ -48,33 +52,30 @@ public:
   typedef std::vector< ParameterFileNameType >                    ParameterFileNameVectorType;
   typedef ParameterFileNameVectorType::iterator                   ParameterFileNameVectorIterator;
   typedef ParameterFileNameVectorType::const_iterator             ParameterFileNameVectorConstIterator;
-
   typedef itk::ParameterFileParser                                ParameterFileParserType;
   typedef ParameterFileParserType::Pointer                        ParameterFileParserPointer;
 
-  void SetParameterMap( const ParameterMapType parameterMap );
-  void SetParameterMap( const ParameterMapVectorType parameterMapVector );
-  void AddParameterMap( const ParameterMapType parameterMap );
+  /* Set/Get/Add parameter map or vector of parameter maps. */
+  // TODO: Use itkSetMacro for ParameterMapVectorType
+  void SetParameterMap( const ParameterMapType & parameterMap );
+  void SetParameterMap( const ParameterMapVectorType & parameterMap );
+  void AddParameterMap( const ParameterMapType & parameterMap );
+  const ParameterMapType& GetParameterMap( const unsigned int index ) const;
+  itkGetConstReferenceMacro( ParameterMap, ParameterMapVectorType );
 
-  ParameterMapType& GetParameterMap( unsigned int index );
-  ParameterMapVectorType& GetParameterMap( void );
-  const ParameterMapVectorType& GetParameterMap( void ) const;
+  /* Read/Write parameter file or multiple parameter files to/from disk. */
+  void ReadParameterFile( const ParameterFileNameType & parameterFileName );
+  void ReadParameterFile( const ParameterFileNameVectorType & parameterFileNameVector );
+  void AddParameterFile( const ParameterFileNameType & parameterFileName );
+  void WriteParameterFile( const ParameterMapType & parameterMap, const ParameterFileNameType & parameterFileName );
+  void WriteParameterFile( const ParameterFileNameType & parameterFileName );
+  void WriteParameterFile( const ParameterFileNameVectorType & parameterFileNameVector );
 
-  void ReadParameterFile( const ParameterFileNameType parameterFileName );
-  void ReadParameterFile( const ParameterFileNameVectorType parameterFileNameVector );
-  void AddParameterFile( const ParameterFileNameType parameterFileName );
-  
-  void WriteParameterFile( const ParameterMapType parameterMap, const ParameterFileNameType parameterFileName );
-  void WriteParameterFile( const ParameterFileNameType parameterFileName );
-  void WriteParameterFile( const ParameterFileNameVectorType parameterFileNameVector );
+  /* Get preconfigured parameter maps. */
+  static const ParameterMapType GetDefaultParameterMap( const std::string & transformName, const unsigned int & numberOfResolutions = 4u, const double & finalGridSpacingInPhysicalUnits = 10.0 );
 
-  // Default parameter maps
-  void SetParameterMap( const std::string transformName, const unsigned int numberOfResolutions = 3u, const double finalGridSpacingInPhysicalUnits = 10.0 );
-  void AddParameterMap( const std::string transformName, const unsigned int numberOfResolutions = 3u, const double finalGridSpacingInPhysicalUnits = 10.0 );
-  ParameterMapType GetParameterMap( const std::string transformName, const unsigned int numberOfResolutions = 3u, const double finalGridSpacingInPhysicalUnits = 10.0 );
-
-  // C++11 has a to_string in the standard library, but it is undesirable to
-  // introduce a C++11 dependency for a simple number to string helper function
+  // C++11 has a to_string in the standard library, but we like to 
+  // avoid introducing C++11 dependency for this single function
   template< typename T >
   static std::string ToString( const T& n )
   {
@@ -83,9 +84,13 @@ public:
     return stm.str();
   }
 
+protected: 
+  
+  void PrintSelf( std::ostream & os, itk::Indent indent ) const ITK_OVERRIDE;
+
 private:
 
-  ParameterMapVectorType  m_ParameterMapVector;
+  ParameterMapVectorType m_ParameterMap;
 
 };
 

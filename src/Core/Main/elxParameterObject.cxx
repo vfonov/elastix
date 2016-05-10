@@ -28,57 +28,64 @@
 namespace elastix
 {
 
+/**
+ * ********************* SetParameterMap *********************
+ */
+
 void
 ParameterObject
-::SetParameterMap( const ParameterMapType parameterMap )
+::SetParameterMap( const ParameterMapType & parameterMap )
 {
-  ParameterMapVectorType parameterMapVector;
-  parameterMapVector.push_back( parameterMap );
+  ParameterMapVectorType parameterMapVector = ParameterMapVectorType( 1, parameterMap );
   this->SetParameterMap( parameterMapVector );
 }
 
-void
-ParameterObject
-::SetParameterMap( const ParameterMapVectorType parameterMapVector )
-{
-  this->Modified();
-  this->m_ParameterMapVector = parameterMapVector;
-}
+/**
+ * ********************* SetParameterMap *********************
+ */
 
 void
 ParameterObject
-::AddParameterMap( const ParameterMapType parameterMap )
+::SetParameterMap( const ParameterMapVectorType & parameterMap )
 {
-  this->Modified();
-  this->m_ParameterMapVector.push_back( parameterMap );
+  if( this->m_ParameterMap != parameterMap )
+  {
+    this->m_ParameterMap = parameterMap;
+    this->Modified();
+  }
 }
 
-ParameterObject::ParameterMapType&
-ParameterObject
-::GetParameterMap( unsigned int index )
-{
-  this->Modified();
-  return this->m_ParameterMapVector[ index ];
-}
 
-ParameterObject::ParameterMapVectorType&
-ParameterObject
-::GetParameterMap( void )
-{
-  this->Modified();
-  return this->m_ParameterMapVector;
-}
-
-const ParameterObject::ParameterMapVectorType&
-ParameterObject
-::GetParameterMap( void ) const
-{
-  return this->m_ParameterMapVector;
-}
+/**
+ * ********************* AddParameterMap *********************
+ */
 
 void
 ParameterObject
-::ReadParameterFile( const ParameterFileNameType parameterFileName )
+::AddParameterMap( const ParameterMapType & parameterMap )
+{
+  this->m_ParameterMap.push_back( parameterMap );
+  this->Modified();
+}
+
+/**
+ * ********************* GetParameterMap *********************
+ */
+
+const ParameterObject::ParameterMapType &
+ParameterObject
+::GetParameterMap( const unsigned int index ) const
+{
+  return this->m_ParameterMap[ index ];
+}
+
+/**
+ * ********************* ReadParameterFile *********************
+ */
+
+void
+ParameterObject
+::ReadParameterFile( const ParameterFileNameType & parameterFileName )
 {
   ParameterFileParserPointer parameterFileParser = ParameterFileParserType::New();
   parameterFileParser->SetParameterFileName( parameterFileName );
@@ -86,16 +93,20 @@ ParameterObject
   this->SetParameterMap( ParameterMapVectorType( 1, parameterFileParser->GetParameterMap() ) );
 }
 
+/**
+ * ********************* ReadParameterFile *********************
+ */
+
 void
 ParameterObject
-::ReadParameterFile( const ParameterFileNameVectorType parameterFileNameVector )
+::ReadParameterFile( const ParameterFileNameVectorType & parameterFileNameVector )
 {
   if( parameterFileNameVector.size() == 0 )
   {
     itkExceptionMacro( "Parameter filename container is empty." );
   }
 
-  this->m_ParameterMapVector.clear();
+  this->m_ParameterMap.clear();
 
   for( unsigned int i = 0; i < parameterFileNameVector.size(); ++i )
   {
@@ -108,19 +119,27 @@ ParameterObject
   }
 }
 
+/**
+ * ********************* AddParameterFile *********************
+ */
+
 void
 ParameterObject
-::AddParameterFile( const ParameterFileNameType parameterFileName )
+::AddParameterFile( const ParameterFileNameType & parameterFileName )
 {
   ParameterFileParserPointer parameterFileParser = ParameterFileParserType::New();
   parameterFileParser->SetParameterFileName( parameterFileName );
   parameterFileParser->ReadParameterFile();
-  this->m_ParameterMapVector.push_back( parameterFileParser->GetParameterMap() );
+  this->m_ParameterMap.push_back( parameterFileParser->GetParameterMap() );
 }
+
+/**
+ * ********************* WriteParameterFile *********************
+ */
 
 void
 ParameterObject
-::WriteParameterFile( const ParameterMapType parameterMap, const ParameterFileNameType parameterFileName )
+::WriteParameterFile( const ParameterMapType & parameterMap, const ParameterFileNameType & parameterFileName )
 {
   std::ofstream parameterFile;
   parameterFile.exceptions( std::ofstream::failbit | std::ofstream::badbit );
@@ -178,57 +197,55 @@ ParameterObject
   }
 }
 
+/**
+ * ********************* WriteParameterFile *********************
+ */
+
 void
 ParameterObject
-::WriteParameterFile( const ParameterFileNameType parameterFileName )
+::WriteParameterFile( const ParameterFileNameType & parameterFileName )
 {
-  if( this->m_ParameterMapVector.size() == 0 )
+  if( this->m_ParameterMap.size() == 0 )
   {
     itkExceptionMacro( "Error writing parameter map to disk: The parameter object is empty." );
   }
 
-  if( this->m_ParameterMapVector.size() > 1 )
+  if( this->m_ParameterMap.size() > 1 )
   {
-    itkExceptionMacro( "Error writing to disk: The number of parameter maps (" << this->m_ParameterMapVector.size() << ")"
+    itkExceptionMacro( "Error writing to disk: The number of parameter maps (" << this->m_ParameterMap.size() << ")"
                     << " does not match the number of provided filenames (1). Please provide a vector of filenames." );
   }
 
-  this->WriteParameterFile( this->m_ParameterMapVector[ 0 ], parameterFileName );
+  this->WriteParameterFile( this->m_ParameterMap[ 0 ], parameterFileName );
 }
+
+/**
+ * ********************* WriteParameterFile *********************
+ */
 
 void
 ParameterObject
-::WriteParameterFile( const ParameterFileNameVectorType parameterFileNameVector )
+::WriteParameterFile( const ParameterFileNameVectorType & parameterFileNameVector )
 {
-  if( this->m_ParameterMapVector.size() != parameterFileNameVector.size() )
+  if( this->m_ParameterMap.size() != parameterFileNameVector.size() )
   {
-    itkExceptionMacro( "Error writing to disk: The number of parameter maps (" << this->m_ParameterMapVector.size() << ")"
+    itkExceptionMacro( "Error writing to disk: The number of parameter maps (" << this->m_ParameterMap.size() << ")"
                     << " does not match the number of provided filenames (" << parameterFileNameVector.size() << ")." );
   }
 
-  for( unsigned int i = 0; i < this->m_ParameterMapVector.size(); ++i )
+  for( unsigned int i = 0; i < this->m_ParameterMap.size(); ++i )
   {
-    this->WriteParameterFile( this->m_ParameterMapVector[ i ], parameterFileNameVector[ i ] );
+    this->WriteParameterFile( this->m_ParameterMap[ i ], parameterFileNameVector[ i ] );
   }
 }
 
-void
-ParameterObject
-::SetParameterMap( const std::string transformName, const unsigned int numberOfResolutions, const double finalGridSpacingInPhysicalUnits )
-{
-  this->m_ParameterMapVector = ParameterMapVectorType( 1, this->GetParameterMap( transformName, numberOfResolutions, finalGridSpacingInPhysicalUnits ) );
-}
+/**
+ * ********************* GetParameterMap *********************
+ */
 
-void
+const ParameterObject::ParameterMapType
 ParameterObject
-::AddParameterMap( const std::string transformName, const unsigned int numberOfResolutions, const double finalGridSpacingInPhysicalUnits )
-{
-  this->m_ParameterMapVector.push_back( this->GetParameterMap( transformName, numberOfResolutions, finalGridSpacingInPhysicalUnits ) );
-}
-
-ParameterObject::ParameterMapType
-ParameterObject
-::GetParameterMap( const std::string transformName, const unsigned int numberOfResolutions, const double finalGridSpacingInPhysicalUnits )
+::GetDefaultParameterMap( const std::string & transformName, const unsigned int & numberOfResolutions, const double & finalGridSpacingInPhysicalUnits )
 {
   // Parameters that depend on size and number of resolutions
   ParameterMapType parameterMap                        = ParameterMapType();
@@ -236,10 +253,10 @@ ParameterObject
   // Common Components
   parameterMap[ "FixedImagePyramid" ]                  = ParameterValueVectorType( 1, "FixedSmoothingImagePyramid" );
   parameterMap[ "MovingImagePyramid" ]                 = ParameterValueVectorType( 1, "MovingSmoothingImagePyramid" );
-  parameterMap[ "Interpolator"]                        = ParameterValueVectorType( 1, "LinearInterpolator");
+  parameterMap[ "Interpolator"]                        = ParameterValueVectorType( 1, "LinearInterpolator" );
   parameterMap[ "Optimizer" ]                          = ParameterValueVectorType( 1, "AdaptiveStochasticGradientDescent" );
-  parameterMap[ "Resampler"]                           = ParameterValueVectorType( 1, "DefaultResampler" );
-  parameterMap[ "ResampleInterpolator"]                = ParameterValueVectorType( 1, "FinalBSplineInterpolator" );
+  parameterMap[ "Resampler" ]                          = ParameterValueVectorType( 1, "DefaultResampler" );
+  parameterMap[ "ResampleInterpolator" ]               = ParameterValueVectorType( 1, "FinalBSplineInterpolator" );
   parameterMap[ "FinalBSplineInterpolationOrder" ]     = ParameterValueVectorType( 1, "3" );
   parameterMap[ "NumberOfResolutions" ]                = ParameterValueVectorType( 1, ToString( numberOfResolutions ) );
 
@@ -248,7 +265,7 @@ ParameterObject
   parameterMap[ "NumberOfSpatialSamples"]              = ParameterValueVectorType( 1, "2048" );
   parameterMap[ "CheckNumberOfSamples" ]               = ParameterValueVectorType( 1, "true" );
   parameterMap[ "MaximumNumberOfSamplingAttempts" ]    = ParameterValueVectorType( 1, "8" );
-  parameterMap[ "NewSamplesEveryIteration" ]           = ParameterValueVectorType( 1, "true");
+  parameterMap[ "NewSamplesEveryIteration" ]           = ParameterValueVectorType( 1, "true" );
 
   // Optimizer
   parameterMap[ "NumberOfSamplesForExactGradient" ]    = ParameterValueVectorType( 1, "4096" );
@@ -266,8 +283,6 @@ ParameterObject
     parameterMap[ "Transform" ]                        = ParameterValueVectorType( 1, "TranslationTransform" );
     parameterMap[ "Metric" ]                           = ParameterValueVectorType( 1, "AdvancedMattesMutualInformation" );
     parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "256" );
-    parameterMap[ "AutomaticTransformInitialization" ] = ParameterValueVectorType( 1, "true" );
-    parameterMap[ "AutomaticTransformInitializationMethod" ] = ParameterValueVectorType( 1, "CenterOfGravity" );
   }
   else if( transformName == "rigid" )
   {
@@ -281,7 +296,7 @@ ParameterObject
     parameterMap[ "Registration" ]                     = ParameterValueVectorType( 1, "MultiResolutionRegistration" );
     parameterMap[ "Transform" ]                        = ParameterValueVectorType( 1, "AffineTransform" );
     parameterMap[ "Metric" ]                           = ParameterValueVectorType( 1, "AdvancedMattesMutualInformation" );
-    parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "512" );
+    parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "256" );
   }
   else if( transformName == "bspline" || transformName == "nonrigid" ) // <-- nonrigid for backwards compatibility
   {
@@ -291,29 +306,36 @@ ParameterObject
     parameterMap[ "Metric" ].push_back( "TransformBendingEnergyPenalty" );
     parameterMap[ "Metric0Weight" ]                    = ParameterValueVectorType( 1, "1.0" );
     parameterMap[ "Metric1Weight" ]                    = ParameterValueVectorType( 1, "10000.0" );
-    parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "512" );
+    parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "256" );
+  }
+  else if( transformName == "spline")   
+  {   
+    parameterMap[ "Registration" ]                     = ParameterValueVectorType( 1, "MultiResolutionRegistration" );    
+    parameterMap[ "Transform" ]                        = ParameterValueVectorType( 1, "SplineKernelTransform" );    
+    parameterMap[ "Metric" ]                           = ParameterValueVectorType( 1, "AdvancedMattesMutualInformation" );    
+    parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "256" );
   }
   else if( transformName == "groupwise" )
   {
     parameterMap[ "Registration" ]                     = ParameterValueVectorType( 1, "MultiResolutionRegistration" );
     parameterMap[ "Transform" ]                        = ParameterValueVectorType( 1, "BSplineStackTransform" );
     parameterMap[ "Metric" ]                           = ParameterValueVectorType( 1, "VarianceOverLastDimensionMetric" );
-    parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "512" );
+    parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "256" );
     parameterMap[ "Interpolator"]                      = ParameterValueVectorType( 1, "ReducedDimensionBSplineInterpolator" );
     parameterMap[ "ResampleInterpolator" ]             = ParameterValueVectorType( 1, "FinalReducedDimensionBSplineInterpolator" );
   }
   else
   {
-    itkExceptionMacro( "No default parameter map \"" << transformName << "\"." );
+    itkGenericExceptionMacro( "No default parameter map \"" << transformName << "\"." );
   }
 
   // B-spline transform settings
-  if( transformName == "nonrigid" || transformName == "groupwise" )
+  if( transformName == "bspline" || transformName == "nonrigid" || transformName == "groupwise" ) // <-- nonrigid for backwards compatibility
   {
     ParameterValueVectorType gridSpacingSchedule = ParameterValueVectorType();
-    for( unsigned int resolution = 0; resolution < numberOfResolutions; ++resolution )
+    for( double resolution = 0; resolution < numberOfResolutions; ++resolution )
     {
-      gridSpacingSchedule.insert( gridSpacingSchedule.begin(), ToString( pow( 2, resolution ) ) );
+      gridSpacingSchedule.insert( gridSpacingSchedule.begin(), ToString( pow( 1.41, resolution ) ) );
     }
 
     parameterMap[ "GridSpacingSchedule" ] = gridSpacingSchedule;
@@ -323,36 +345,46 @@ ParameterObject
   return parameterMap;
 }
 
+/**
+ * ********************* PrintSelf *********************
+ */
+
+void
+ParameterObject
+::PrintSelf( std::ostream & os, itk::Indent indent ) const
+{
+  Superclass::PrintSelf(os, indent);
+
+  for( unsigned int i = 0; i < this->m_ParameterMap.size(); ++i )
+  {
+    os << "ParameterMap " << i << ": " << std::endl;
+    ParameterMapConstIterator parameterMapIterator = this->m_ParameterMap[ i ].begin();
+    ParameterMapConstIterator parameterMapIteratorEnd = this->m_ParameterMap[ i ].end();
+    while( parameterMapIterator != parameterMapIteratorEnd )
+    {
+      os << "  (" << parameterMapIterator->first;
+      ParameterValueVectorType parameterMapValueVector = parameterMapIterator->second;
+      
+      for(unsigned int j = 0; j < parameterMapValueVector.size(); ++j)
+      {
+        std::stringstream stream( parameterMapValueVector[ j ] );
+        float number;
+        stream >> number;
+        if( stream.fail() ) {
+           os << " \"" << parameterMapValueVector[ j ] << "\"";
+        }
+        else
+        {
+          os << " " << number;
+        }      
+      }
+      
+      os << ")" << std::endl;
+      ++parameterMapIterator;
+    }
+  }
+}
+
 } // namespace elastix
 
 #endif // elxParameterObject_cxx
-
-// http://stackoverflow.com/questions/9670396/exception-handling-and-opening-a-file
-// TODO: Implement exception handling for parameter file reader/writer, rethrow itk exception
-// int main () {
-//   ifstream file;
-//   file.exceptions ( ifstream::failbit | ifstream::badbit );
-//   try {
-//     file.open ("test.txt");
-//     while (!file.eof()) file.get();
-//   }
-//   catch ( ifstream::failure e ) {
-//     cout << "Exception opening/reading file";
-//   }
-//   file.close();
-//   return 0;
-// }
-
-// int main () {
-//   ofstream file;
-//   file.exceptions ( ofstream::failbit | ofstream::badbit | ofstream::failure );
-//   try {
-//     file.open ("test.txt");
-//     while (!file.eof()) file.get();
-//   }
-//   catch (ifstream::failure e) {
-//     cout << "Exception opening/reading file";
-//   }
-//   file.close();
-//   return 0;
-// }
