@@ -216,20 +216,23 @@ main( int argc, char ** argv )
   totaltimer.Start();
   elxout << "elastix is started at " << GetCurrentDateAndTime() << ".\n" << std::endl;
 
-  /** Print where elastix was run. */
-  elxout << "which elastix:   " << argv[ 0 ] << std::endl;
-  itksys::SystemInformation info;
-  info.RunCPUCheck();
-  info.RunOSCheck();
-  info.RunMemoryCheck();
-  elxout << "elastix runs at: " << info.GetHostname() << std::endl;
-  elxout << "  " << info.GetOSName() << " "
-        << info.GetOSRelease() << ( info.Is64Bits() ? " (x64), " : ", " )
-        << info.GetOSVersion() << std::endl;
-  elxout << "  with " << info.GetTotalPhysicalMemory() << " MB memory, and "
-        << info.GetNumberOfPhysicalCPU() << " cores @ "
-        << static_cast< unsigned int >( info.GetProcessorClockFrequency() )
-        << " MHz." << std::endl;
+  if(!quiet_mode)
+  {
+    /** Print where elastix was run. */
+    elxout << "which elastix:   " << argv[ 0 ] << std::endl;
+    itksys::SystemInformation info;
+    info.RunCPUCheck();
+    info.RunOSCheck();
+    info.RunMemoryCheck();
+    elxout << "elastix runs at: " << info.GetHostname() << std::endl;
+    elxout << "  " << info.GetOSName() << " "
+          << info.GetOSRelease() << ( info.Is64Bits() ? " (x64), " : ", " )
+          << info.GetOSVersion() << std::endl;
+    elxout << "  with " << info.GetTotalPhysicalMemory() << " MB memory, and "
+          << info.GetNumberOfPhysicalCPU() << " cores @ "
+          << static_cast< unsigned int >( info.GetProcessorClockFrequency() )
+          << " MHz." << std::endl;
+  }
   /**
    * ********************* START REGISTRATION *********************
    *
