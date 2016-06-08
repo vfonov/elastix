@@ -174,7 +174,13 @@ ElastixMain::ComponentLoaderPointer   ElastixMain::s_ComponentLoader = 0;
 
 ElastixMain::~ElastixMain()
 {
-  //nothing
+#ifdef ELASTIX_USE_OPENCL
+  itk::OpenCLContext::Pointer context = itk::OpenCLContext::GetInstance();
+  if( context->IsCreated() )
+  {
+    context->Release();
+  }
+#endif
 } // end Destructor
 
 
@@ -1041,7 +1047,7 @@ ElastixMain::GetImageInformationFromFile(
     testReader->SetFileName( filename.c_str() );
 
     /** Generate all information. */
-    testReader->GenerateOutputInformation();
+    testReader->UpdateOutputInformation();
 
     /** Extract the required information. */
     itk::ImageIOBase::Pointer testImageIO = testReader->GetImageIO();

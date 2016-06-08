@@ -40,13 +40,13 @@ set( dashboard_do_coverage ON )
 set( dashboard_do_memcheck ON )
 
 # Valgrind options
-#set( CTEST_MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --quiet --tool=memcheck --leak-check=yes --show-reachable=yes --num-callers=100 --verbose --demangle=yes --gen-suppressions=all" )
+set( CTEST_MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --tool=memcheck --leak-check=yes --show-reachable=no --num-callers=100 --verbose --demangle=yes" )
 #set( CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/CMake/InsightValgrind.supp )
 
 # Dashboard settings
 set( dashboard_cache "
 // Which ITK to use
-ITK_DIR:PATH=/usr/local/toolkits/ITK/git/bin_debug
+ITK_DIR:PATH=/srv/lkeb-goliath/toolkits/ITK/git/bin_debug
 
 // Coverage settings: -fprofile-arcs -ftest-coverage
 CMAKE_CXX_FLAGS_DEBUG:STRING=-g -O0 -fprofile-arcs -ftest-coverage

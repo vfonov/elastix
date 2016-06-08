@@ -60,8 +60,8 @@ PCAMetric2<TFixedImage, TMovingImage>
   Superclass::Initialize();
 
   /** Retrieve slowest varying dimension and its size. */
-  const unsigned int lastDim = this->GetFixedImage()->GetImageDimension() - 1;
-  const unsigned int G = this->GetFixedImage()->GetLargestPossibleRegion().GetSize( lastDim );
+  //const unsigned int lastDim = this->GetFixedImage()->GetImageDimension() - 1;
+  //const unsigned int G = this->GetFixedImage()->GetLargestPossibleRegion().GetSize( lastDim );
 
 } // end Initialize()
 
@@ -92,7 +92,8 @@ PCAMetric2<TFixedImage, TMovingImage>
   numbers.clear();
 
   /** Initialize random number generator. */
-  Statistics::MersenneTwisterRandomVariateGenerator::Pointer randomGenerator = Statistics::MersenneTwisterRandomVariateGenerator::GetInstance();
+  Statistics::MersenneTwisterRandomVariateGenerator::Pointer randomGenerator
+    = Statistics::MersenneTwisterRandomVariateGenerator::GetInstance();
 
   /** Sample additional at fixed timepoint. */
   for( unsigned int i = 0; i < m_NumAdditionalSamplesFixed; ++i )
@@ -371,7 +372,7 @@ PCAMetric2<TFixedImage, TMovingImage>
   itkDebugMacro( "GetValueAndDerivative( " << parameters << " ) " );
   /** Define derivative and Jacobian types. */
   typedef typename DerivativeType::ValueType        DerivativeValueType;
-  typedef typename TransformJacobianType::ValueType TransformJacobianValueType;
+  //typedef typename TransformJacobianType::ValueType TransformJacobianValueType;
 
   /** Initialize some variables */
   const unsigned int P = this->GetNumberOfParameters();

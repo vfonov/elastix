@@ -11,21 +11,22 @@
 # and defaults to Nightly.
 # NOTE that Model should directly follow the comma: no space allowed!
 #
-# Setup: Linux 64bit, Ubuntu 14.04 LTS, 3.13.0-24-generic
-# gcc 4.8.2
-# Release mode, ITK 4.x (git)
+# Setup: Linux 64bit, Ubuntu 14.04.4 LTS (trusty), GNU/Linux 3.13.0-79-generic x86_64
+# clang 3.9.0 (trunk 271891)
+# Debug mode, ITK 4.x (git)
 # PC: LKEB (MS), goliath
 
 # Client maintainer: m.staring@lumc.nl
 set( CTEST_SITE "LKEB.goliath" )
-set( CTEST_BUILD_NAME "Linux-64bit-gcc4.8.2-Release-perf" )
+set( CTEST_BUILD_NAME "Linux-clang3.9-Debug" )
 set( CTEST_BUILD_FLAGS "-j6" ) # parallel build for makefiles
 set( CTEST_TEST_ARGS PARALLEL_LEVEL 6 ) # parallel testing
-set( CTEST_BUILD_CONFIGURATION Release )
+set( CTEST_BUILD_CONFIGURATION Debug )
 set( CTEST_CMAKE_GENERATOR "Unix Makefiles" )
-set( CTEST_DASHBOARD_ROOT "/home/marius/nightly-builds/elastix-perf" )
-set( CTEST_BINARY_DIRECTORY ${CTEST_DASHBOARD_ROOT}/bin_release_perf )
-set( dashboard_url "https://svn.bigr.nl/elastix/branches/performance_ITK4" )
+set( CTEST_DASHBOARD_ROOT "/home/marius/nightly-builds/elastix" )
+set( CTEST_BINARY_DIRECTORY ${CTEST_DASHBOARD_ROOT}/bin_debug_clang )
+set( CTEST_MEMORYCHECK_TYPE "AddressSanitizer" )
+set( ENV{LD_LIBRARY_PATH} "/usr/local/lib:$ENV{LD_LIBRARY_PATH}" )
 
 # Specify the kind of dashboard to submit
 # default: Nightly
@@ -38,16 +39,31 @@ endif()
 
 # Dashboard settings
 set( dashboard_cache "
+// Select the clang compiler
+CMAKE_C_COMPILER:FILEPATH=/usr/local/bin/clang
+CMAKE_C_FLAGS:STRING=-Wall -std=c99 -fsanitize=address -fno-omit-frame-pointer
+CMAKE_C_FLAGS_DEBUG:STRING=-g -O1
+CMAKE_C_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG
+CMAKE_C_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=-O2 -g
+
+CMAKE_CXX_COMPILER:FILEPATH=/usr/local/bin/clang++
+CMAKE_CXX_FLAGS:STRING=-Wall -Wno-overloaded-virtual -fsanitize=address -fno-omit-frame-pointer
+CMAKE_CXX_FLAGS_DEBUG:STRING=-g -O1
+CMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
+CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g
+
 // Which ITK to use
-ITK_DIR:PATH=/srv/lkeb-goliath/toolkits/ITK/git/bin_release
+ITK_DIR:PATH=/srv/lkeb-goliath/toolkits/ITK/git/bin_debug_clang
 
 // Some elastix settings, defining the configuration
 ELASTIX_BUILD_TESTING:BOOL=ON
-ELASTIX_ENABLE_PACKAGER:BOOL=ON
-ELASTIX_USE_EIGEN:BOOL=ON
+ELASTIX_ENABLE_PACKAGER:BOOL=OFF
+ELASTIX_USE_EIGEN:BOOL=OFF
 ELASTIX_USE_OPENCL:BOOL=ON
 ELASTIX_USE_MEVISDICOMTIFF:BOOL=OFF
-ELASTIX_IMAGE_DIMENSIONS:STRING=2;3;4
+ELASTIX_IMAGE_DIMENSIONS:STRING=2;3
 ELASTIX_IMAGE_2D_PIXELTYPES:STRING=float
 ELASTIX_IMAGE_3D_PIXELTYPES:STRING=float
 ELASTIX_IMAGE_4D_PIXELTYPES:STRING=short

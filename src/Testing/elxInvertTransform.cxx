@@ -95,7 +95,7 @@ main( int argc, char * argv[] )
   typedef BaseTransformType::ParametersType                ParametersType;
   typedef BaseTransformType::ScalarType                    ScalarType;
   typedef RigidTransformType::CenterType                   CenterType;
-  typedef BaseTransformType::OutputPointType               OutputPointType;
+  //typedef BaseTransformType::OutputPointType               OutputPointType;
 
   /** Interface to the original transform parameters file. */
   typedef itk::ParameterFileParser   ParserType;
@@ -143,7 +143,7 @@ main( int argc, char * argv[] )
   /** Generate all information. */
   try
   {
-    testReader->GenerateOutputInformation();
+    testReader->UpdateOutputInformation();
   }
   catch( itk::ExceptionObject & e )
   {
@@ -164,7 +164,7 @@ main( int argc, char * argv[] )
 
   /** Read the TransformParameters as a vector. */
   std::vector< ScalarType > vecPar( numberOfParameters,
-  itk::NumericTraits< ScalarType >::ZeroValue() );
+    itk::NumericTraits< ScalarType >::ZeroValue() );
   config->ReadParameter( vecPar, "TransformParameters",
     0, numberOfParameters - 1, true, dummyErrorMessage );
 
