@@ -19,7 +19,6 @@
 #include "elastix.h"
 #include "elxElastixMain.h"
 
-
 int
 main( int argc, char ** argv )
 {

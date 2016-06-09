@@ -65,7 +65,7 @@ DistancePreservingRigidityPenaltyTerm< TFixedImage, TScalarType >
 
   /** Check if this transform is a B-spline transform. */
   typename BSplineTransformType::Pointer localBSplineTransform = 0;
-  bool transformIsBSpline = this->CheckForBSplineTransform( localBSplineTransform );
+  bool transformIsBSpline = this->CheckForBSplineTransform2( localBSplineTransform );
   if( transformIsBSpline )
   {
     this->SetBSplineTransform( localBSplineTransform );
@@ -515,4 +515,3 @@ DistancePreservingRigidityPenaltyTerm< TFixedImage, TScalarType >
 } // end namespace itk
 
 #endif // #ifndef __itkDistancePreservingRigidityPenaltyTerm_hxx
-

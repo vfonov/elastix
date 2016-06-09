@@ -34,7 +34,6 @@
 #include "itkTimeProbe.h"
 #include <time.h>
 
-
 /** Declare PrintHelp function.
  *
  * \commandlinearg --help: optional argument for elastix and transformix to call the help. \n
@@ -50,7 +49,8 @@ void PrintHelp( void );
 /** ConvertSecondsToDHMS
  *
  */
-std::string ConvertSecondsToDHMS( const double totalSeconds, const unsigned int precision = 0 )
+std::string
+ConvertSecondsToDHMS( const double totalSeconds, const unsigned int precision = 0 )
 {
   /** Define days, hours, minutes. */
   const std::size_t secondsPerMinute = 60;
@@ -58,8 +58,8 @@ std::string ConvertSecondsToDHMS( const double totalSeconds, const unsigned int 
   const std::size_t secondsPerDay    = 24 * secondsPerHour;
 
   /** Convert total seconds. */
-  std::size_t iSeconds = static_cast<std::size_t>( totalSeconds );
-  const std::size_t days = iSeconds / secondsPerDay;
+  std::size_t       iSeconds = static_cast< std::size_t >( totalSeconds );
+  const std::size_t days     = iSeconds / secondsPerDay;
 
   iSeconds %= secondsPerDay;
   const std::size_t hours = iSeconds / secondsPerHour;
@@ -72,11 +72,11 @@ std::string ConvertSecondsToDHMS( const double totalSeconds, const unsigned int 
   const double dSeconds = fmod( totalSeconds, 60.0 );
 
   /** Create a string in days, hours, minutes and seconds. */
-  bool nonzero = false;
+  bool               nonzero = false;
   std::ostringstream make_string( "" );
-  if( days    != 0            ){ make_string << days    << "d"; nonzero = true; }
-  if( hours   != 0 || nonzero ){ make_string << hours   << "h"; nonzero = true; }
-  if( minutes != 0 || nonzero ){ make_string << minutes << "m"; nonzero = true; }
+  if( days    != 0            ) { make_string << days    << "d"; nonzero = true; }
+  if( hours   != 0 || nonzero ) { make_string << hours   << "h"; nonzero = true; }
+  if( minutes != 0 || nonzero ) { make_string << minutes << "m"; nonzero = true; }
   make_string << std::showpoint << std::fixed << std::setprecision( precision );
   make_string << dSeconds << "s";
 
@@ -87,7 +87,8 @@ std::string ConvertSecondsToDHMS( const double totalSeconds, const unsigned int 
 
 
 /** Returns current date and time as a string. */
-std::string GetCurrentDateAndTime( void )
+std::string
+GetCurrentDateAndTime( void )
 {
   // Obtain current time
   time_t rawtime = time( NULL );
@@ -101,5 +102,6 @@ std::string GetCurrentDateAndTime( void )
 
   return timeAsString;
 } // end GetCurrentDateAndTime()
+
 
 #endif

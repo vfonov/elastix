@@ -407,7 +407,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
   
   timer.Stop();
   elxout << "  Transforming points done, it took "
-    << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
+         << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
 
   /** Call ComputeDeterminantOfSpatialJacobian.
    * Actually we could loop over all transforms.
@@ -427,7 +427,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
   }
   timer.Stop();
   elxout << "  Computing determinant of spatial Jacobian done, it took "
-    << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
+         << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
 
   /** Call ComputeSpatialJacobian.
    * Actually we could loop over all transforms.
@@ -447,7 +447,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
   }
   timer.Stop();
   elxout << "  Computing spatial Jacobian done, it took "
-    << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
+         << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
 
   /** Resample the image. */
   if( this->GetMovingImage() != 0 )
@@ -477,7 +477,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
     /** Print the elapsed time for the resampling. */
     timer.Stop();
     elxout << "  Resampling took "
-      << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
+           << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
   }
 
   std::string       xfm = this->GetConfiguration()->GetCommandLineArgument( "-xfm" );

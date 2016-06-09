@@ -31,12 +31,20 @@ set( CommonFiles
   itkComputeDisplacementDistribution.hxx
   itkComputeJacobianTerms.h
   itkComputeJacobianTerms.hxx
+  itkErodeMaskImageFilter.h
+  itkErodeMaskImageFilter.hxx
   itkGenericMultiResolutionPyramidImageFilter.h
   itkGenericMultiResolutionPyramidImageFilter.hxx
   itkImageFileCastWriter.h
   itkImageFileCastWriter.hxx
+  itkImageMaskSpatialObject2.h
+  itkImageMaskSpatialObject2.hxx
+  itkImageSpatialObject2.h
+  itkImageSpatialObject2.hxx
   itkMeshFileReaderBase.h
   itkMeshFileReaderBase.hxx
+  itkMultiOrderBSplineDecompositionImageFilter.h
+  itkMultiOrderBSplineDecompositionImageFilter.hxx
   itkMultiResolutionGaussianSmoothingPyramidImageFilter.h
   itkMultiResolutionGaussianSmoothingPyramidImageFilter.hxx
   itkMultiResolutionImageRegistrationMethod2.h
@@ -46,24 +54,19 @@ set( CommonFiles
   itkNDImageBase.h
   itkNDImageTemplate.h
   itkNDImageTemplate.hxx
+  itkParabolicErodeDilateImageFilter.h
+  itkParabolicErodeDilateImageFilter.hxx
+  itkParabolicErodeImageFilter.h
+  itkParabolicMorphUtils.h
+  itkRecursiveBSplineInterpolationWeightFunction.h
+  itkRecursiveBSplineInterpolationWeightFunction.hxx
+  itkReducedDimensionBSplineInterpolateImageFunction.h
+  itkReducedDimensionBSplineInterpolateImageFunction.hxx
   itkScaledSingleValuedNonLinearOptimizer.cxx
   itkScaledSingleValuedNonLinearOptimizer.h
   itkTransformixInputPointFileReader.h
   itkTransformixInputPointFileReader.hxx
   TypeList.h
-)
-
-set( MaskFiles
-  itkImageMaskSpatialObject2.h
-  itkImageMaskSpatialObject2.hxx
-  itkImageSpatialObject2.h
-  itkImageSpatialObject2.hxx
-  itkErodeMaskImageFilter.h
-  itkErodeMaskImageFilter.hxx
-  itkParabolicErodeDilateImageFilter.h
-  itkParabolicErodeDilateImageFilter.hxx
-  itkParabolicErodeImageFilter.h
-  itkParabolicMorphUtils.h
 )
 
 set( CostFunctionFiles
@@ -95,6 +98,8 @@ set( TransformFiles
   Transforms/itkAdvancedBSplineDeformableTransform.hxx
   Transforms/itkAdvancedCombinationTransform.h
   Transforms/itkAdvancedCombinationTransform.hxx
+  Transforms/itkAdvancedEuler3DTransform.h
+  Transforms/itkAdvancedEuler3DTransform.hxx
   Transforms/itkAdvancedIdentityTransform.h
   Transforms/itkAdvancedMatrixOffsetTransformBase.h
   Transforms/itkAdvancedMatrixOffsetTransformBase.hxx
@@ -102,8 +107,19 @@ set( TransformFiles
   Transforms/itkAdvancedRigid2DTransform.hxx
   Transforms/itkAdvancedRigid3DTransform.h
   Transforms/itkAdvancedRigid3DTransform.hxx
+  Transforms/itkAdvancedSimilarity2DTransform.h
+  Transforms/itkAdvancedSimilarity2DTransform.hxx
+  Transforms/itkAdvancedSimilarity3DTransform.h
+  Transforms/itkAdvancedSimilarity3DTransform.hxx
   Transforms/itkAdvancedTransform.h
   Transforms/itkAdvancedTransform.hxx
+  Transforms/itkAdvancedTranslationTransform.h
+  Transforms/itkAdvancedTranslationTransform.hxx
+  Transforms/itkAdvancedVersorTransform.h
+  Transforms/itkAdvancedVersorTransform.hxx
+  Transforms/itkAdvancedVersorRigid3DTransform.h
+  Transforms/itkAdvancedVersorRigid3DTransform.hxx
+  Transforms/itkBSplineDerivativeKernelFunction2.h
   Transforms/itkBSplineInterpolationDerivativeWeightFunction.h
   Transforms/itkBSplineInterpolationDerivativeWeightFunction.hxx
   Transforms/itkBSplineInterpolationSecondOrderDerivativeWeightFunction.h
@@ -112,16 +128,24 @@ set( TransformFiles
   Transforms/itkBSplineInterpolationWeightFunction2.hxx
   Transforms/itkBSplineInterpolationWeightFunctionBase.h
   Transforms/itkBSplineInterpolationWeightFunctionBase.hxx
-  #Transforms/itkBSplineKernelFunction2.h
-  #Transforms/itkBSplineSecondOrderDerivativeKernelFunction.h
+  Transforms/itkBSplineKernelFunction2.h
   Transforms/itkBSplineSecondOrderDerivativeKernelFunction2.h
+  Transforms/itkCyclicBSplineDeformableTransform.h
+  Transforms/itkCyclicBSplineDeformableTransform.hxx
+  Transforms/itkCyclicGridScheduleComputer.h
+  Transforms/itkCyclicGridScheduleComputer.hxx
   Transforms/itkEulerTransform.h
+  Transforms/itkGridScheduleComputer.h
+  Transforms/itkGridScheduleComputer.hxx
+  Transforms/itkRecursiveBSplineTransform.hxx
+  Transforms/itkRecursiveBSplineTransform.h
+  Transforms/itkRecursiveBSplineTransformImplementation.h
+  Transforms/itkStackTransform.h
+  Transforms/itkStackTransform.hxx
   Transforms/itkTransformToDeterminantOfSpatialJacobianSource.h
   Transforms/itkTransformToDeterminantOfSpatialJacobianSource.hxx
   Transforms/itkTransformToSpatialJacobianSource.h
   Transforms/itkTransformToSpatialJacobianSource.hxx
-  Transforms/itkGridScheduleComputer.h
-  Transforms/itkGridScheduleComputer.hxx
   Transforms/itkUpsampleBSplineParametersFilter.h
   Transforms/itkUpsampleBSplineParametersFilter.hxx
 )
@@ -161,7 +185,7 @@ set( ImageSamplersFiles
 #---------------------------------------------------------------------
 # Construct source groups for nice visualisation in Visual Studio.
 
-source_group( "Masks" FILES ${MaskFiles} )
+source_group( "Common" FILES ${CommonFiles} )
 source_group( "CostFunctions" FILES ${CostFunctionFiles} )
 source_group( "Transforms" FILES ${TransformFiles} )
 source_group( "LineSearchOptimizers" FILES ${LineSearchOptimizersFiles} )
@@ -171,7 +195,6 @@ source_group( "ImageSamplers" FILES ${ImageSamplersFiles} )
 # Create the elxCommon library.
 
 add_library( elxCommon STATIC
-  ${MaskFiles}
   ${CommonFiles}
   ${CostFunctionFiles}
   ${TransformFiles}
