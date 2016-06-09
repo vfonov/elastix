@@ -67,6 +67,9 @@ public:
   /** Function to unload components. */
   virtual void UnloadComponents( void );
 
+  itkGetMacro( Quiet, bool );
+  itkSetMacro( Quiet, bool );
+  
 protected:
 
   /** Standard constructor and destructor. */
@@ -83,6 +86,9 @@ private:
   /** Standard private (copy)constructor. */
   ComponentLoader( const Self & );  // purposely not implemented
   void operator=( const Self & );   // purposely not implemented
+  
+  /** Supress output of progress messages */
+  bool m_Quiet;
 
 };
 

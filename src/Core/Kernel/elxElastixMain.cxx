@@ -198,6 +198,7 @@ ElastixMain
   /** Initialize the configuration object with the
    * command line parameters entered by the user.
    */
+  this->m_Configuration->SetQuiet(this->GetQuiet());
   int dummy = this->m_Configuration->Initialize( argmap );
   if( dummy )
   {
@@ -220,6 +221,7 @@ ElastixMain
   /** Initialize the configuration object with the
    * command line parameters entered by the user.
    */
+  this->m_Configuration->SetQuiet(this->GetQuiet());
   int dummy = this->m_Configuration->Initialize( argmap, inputMap );
   if( dummy )
   {
@@ -247,6 +249,7 @@ ElastixMain
      * command line parameters entered by the user.
      */
     this->m_Configurations[ i ] = ConfigurationType::New();
+    this->m_Configurations[ i ]->SetQuiet(this->GetQuiet());
     int dummy = this->m_Configurations[ i ]->Initialize( argmap, inputMaps[ i ] );
     if( dummy )
     {
@@ -756,6 +759,7 @@ ElastixMain::LoadComponents( void )
   if( this->s_ComponentLoader.IsNull() )
   {
     this->s_ComponentLoader = ComponentLoaderType::New();
+    this->s_ComponentLoader->SetQuiet(this->GetQuiet());
     this->s_ComponentLoader->SetComponentDatabase( s_CDB );
   }
 
@@ -1004,6 +1008,7 @@ ElastixMain::SetMeasureMode( void )
   std::string mode
     = this->m_Configuration->GetCommandLineArgument( "-M" );
 
+  std::cout<<"Measuring mode="<<mode.c_str()<<std::endl;
   this->m_MeasureMode=(mode=="on");
 }
 

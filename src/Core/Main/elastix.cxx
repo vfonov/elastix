@@ -211,6 +211,14 @@ main( int argc, char ** argv )
       returndummy = -2;
       std::cerr << "ERROR: No CommandLine option \"-out\" given!" << std::endl;
     }
+  } else {
+    /** Need to setup xout without output file here? */
+    int returndummy2 = elx::xoutSetup( NULL , false, true );
+    if( returndummy2 )
+    {
+      std::cerr << "ERROR while setting up xout." << std::endl;
+    }
+    returndummy |= returndummy2;
   }
   
   /** Stop if some fatal errors occurred. */
@@ -219,7 +227,7 @@ main( int argc, char ** argv )
     return returndummy;
   }
 
-  elxout << std::endl;
+  if(!quiet_mode) elxout << std::endl;
 
   /** Declare a timer, start it and print the start time. */
   itk::TimeProbe totaltimer;
@@ -255,6 +263,7 @@ main( int argc, char ** argv )
     elastices.push_back( ElastixMainType::New() );
 
     /** Set stuff we get from a former registration. */
+    elastices[ i ]->SetQuiet(quiet_mode);
     elastices[ i ]->SetInitialTransform( transform );
     elastices[ i ]->SetFixedImageContainer( fixedImageContainer );
     elastices[ i ]->SetMovingImageContainer( movingImageContainer );

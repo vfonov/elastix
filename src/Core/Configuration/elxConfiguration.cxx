@@ -37,6 +37,7 @@ Configuration::Configuration()
   this->m_IsInitialized              = false;
   this->m_ElastixLevel               = 0;
   this->m_TotalNumberOfElastixLevels = 1;
+  this->m_Quiet                      = false;
 
 } // end Constructor()
 
@@ -153,7 +154,8 @@ Configuration
   this->m_ParameterFileParser->SetParameterFileName( this->m_ParameterFileName );
   try
   {
-    xl::xout[ "standard" ] << "Reading the elastix parameters from file ...\n" << std::endl;
+    if(!this->m_Quiet)
+      xl::xout[ "standard" ] << "Reading the elastix parameters from file ...\n" << std::endl;
     this->m_ParameterFileParser->ReadParameterFile();
   }
   catch( itk::ExceptionObject & excp )
@@ -169,7 +171,7 @@ Configuration
 
   /** Silently check in the parameter file if error messages should be printed. */
   this->m_ParameterMapInterface->SetPrintErrorMessages( false );
-  bool printErrorMessages = true;
+  bool printErrorMessages = !this->m_Quiet;
   this->ReadParameter( printErrorMessages, "PrintErrorMessages", 0, false );
   this->m_ParameterMapInterface->SetPrintErrorMessages( printErrorMessages );
 

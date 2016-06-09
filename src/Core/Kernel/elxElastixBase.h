@@ -363,6 +363,10 @@ public:
   virtual void SetQuiet(bool mode) {
     this->m_Quiet=mode;
   }
+  /** Get quiet mode */
+  virtual bool GetQuiet(void) const {
+    return this->m_Quiet;
+  }
   
   /** Set measure mode */
   virtual void SetMeasureMode(bool mode) {

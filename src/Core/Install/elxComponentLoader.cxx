@@ -89,6 +89,7 @@ public:
 ComponentLoader::ComponentLoader()
 {
   this->m_ImageTypeSupportInstalled = false;
+  this->m_Quiet = false;
 }
 
 
@@ -154,7 +155,8 @@ ComponentLoader::LoadComponents( const char * /** argv0 */ )
     }
   }   //end if !ImageTypeSupportInstalled
 
-  elxout << "Installing all components." << std::endl;
+  if(!this->m_Quiet)
+    elxout << "Installing all components." << std::endl;
 
   /** Fill the component database */
   installReturnCode = InstallAllComponents( this->m_ComponentDatabase );
@@ -166,7 +168,8 @@ ComponentLoader::LoadComponents( const char * /** argv0 */ )
     return installReturnCode;
   }
 
-  elxout << "InstallingComponents was successful.\n" << std::endl;
+  if(!this->m_Quiet)
+    elxout << "InstallingComponents was successful.\n" << std::endl;
 
   return 0;
 

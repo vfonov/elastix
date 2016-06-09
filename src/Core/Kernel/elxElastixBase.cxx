@@ -69,7 +69,7 @@ ElastixBase::ElastixBase()
    * backward compatability. From Elastix 4.8: set it to true by default.*/
   this->m_UseDirectionCosines = true;
   
-  this->m_MeasureMode = false;
+  this->m_MeasureMode         = false;
 
 } // end Constructor
 
@@ -115,10 +115,12 @@ ElastixBase::BeforeAllBase( void )
   elxout << std::fixed;
   elxout << std::showpoint;
   elxout << std::setprecision( 3 );
+  if(!this->GetQuiet())
   elxout << "ELASTIX version: " << __ELASTIX_VERSION << std::endl;
   elxout << std::setprecision( this->GetDefaultOutputPrecision() );
 
   /** Check Command line options and print them to the logfile. */
+  if(!this->GetQuiet())
   elxout << "Command line options from ElastixBase:" << std::endl;
   std::string check = "";
 
@@ -195,7 +197,8 @@ ElastixBase::BeforeAllBase( void )
 
       this->GetConfiguration()->SetCommandLineArgument( "-out", folder.c_str() );
     }
-    elxout << "-out      " << check << std::endl;
+    if(!this->GetQuiet())
+      elxout << "-out      " << check << std::endl;
   }
 
   /** Print all "-p". */
@@ -207,7 +210,10 @@ ElastixBase::BeforeAllBase( void )
     tempPname << "-p(" << i << ")";
     check = this->GetConfiguration()->GetCommandLineArgument( tempPname.str().c_str() );
     if( check == "" ) { loop = false; }
-    else { elxout << "-p        " << check << std::endl; }
+    else { 
+      if(!this->GetQuiet())
+        elxout << "-p        " << check << std::endl; 
+    }
     ++i;
   }
 
@@ -216,11 +222,13 @@ ElastixBase::BeforeAllBase( void )
   check = this->GetConfiguration()->GetCommandLineArgument( "-priority" );
   if( check == "" )
   {
-    elxout << "-priority unspecified, so NORMAL process priority" << std::endl;
+    if(!this->GetQuiet())
+      elxout << "-priority unspecified, so NORMAL process priority" << std::endl;
   }
   else
   {
-    elxout << "-priority " << check << std::endl;
+    if(!this->GetQuiet())
+      elxout << "-priority " << check << std::endl;
   }
 #endif
 
@@ -228,11 +236,13 @@ ElastixBase::BeforeAllBase( void )
   check = this->GetConfiguration()->GetCommandLineArgument( "-threads" );
   if( check == "" )
   {
-    elxout << "-threads  unspecified, so all available threads are used" << std::endl;
+    if(!this->GetQuiet())
+      elxout << "-threads  unspecified, so all available threads are used" << std::endl;
   }
   else
   {
-    elxout << "-threads  " << check << std::endl;
+    if(!this->GetQuiet())
+      elxout << "-threads  " << check << std::endl;
   }
 
   /** Check the very important UseDirectionCosines parameter. */

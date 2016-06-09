@@ -236,6 +236,10 @@ public:
   }
 
 
+  itkSetMacro( Quiet, bool );
+  itkGetConstMacro( Quiet, bool );
+  
+  
 protected:
 
   Configuration();
@@ -260,6 +264,8 @@ private:
   bool         m_IsInitialized;
   unsigned int m_ElastixLevel;
   unsigned int m_TotalNumberOfElastixLevels;
+  
+  bool                         m_Quiet;
 
 };
 
