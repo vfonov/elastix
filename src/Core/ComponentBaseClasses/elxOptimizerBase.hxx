@@ -35,7 +35,6 @@ OptimizerBase< TElastix >
 ::OptimizerBase()
 {
   this->m_NewSamplesEveryIteration = false;
-
 } // end Constructor
 
 
@@ -149,6 +148,23 @@ OptimizerBase< TElastix >
   return this->m_NewSamplesEveryIteration;
 
 } // end GetNewSamplesEveryIteration()
+
+
+/**
+ * ****************** GetMeasureMode ********************
+ */
+
+template< class TElastix >
+bool
+OptimizerBase< TElastix >
+::GetMeasureMode( void ) const
+{
+  /** itkGetConstMacro Without the itkDebugMacro. */
+  return this->GetElastix()->GetMeasureMode();
+} // end GetMeasureMode()
+
+
+
 
 
 /**

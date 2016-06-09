@@ -106,7 +106,10 @@ namespace elastix
  *  image, which relates voxel coordinates to world coordinates. Ignoring it
  *  may easily lead to left/right swaps for example, which could skrew up a
  *  (medical) analysis.
- *
+ * \parameter MeasureMode: if this flag is set to "true"
+ *    the optimizer will terminate after a single iteration to estimate
+ *    metric value at the current set of parameters only
+ * 
  * \ingroup Kernel
  */
 

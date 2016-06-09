@@ -44,7 +44,7 @@ namespace elastix
  *    Choose one from {"true", "false"} for every resolution.\n
  *    example: <tt>(NewSamplesEveryIteration "true" "true" "true")</tt> \n
  *    Default is "false" for every resolution.\n
- *
+ * 
  * \ingroup Optimizers
  * \ingroup ComponentBaseClasses
  */
@@ -123,6 +123,10 @@ protected:
   /** Check whether the user asked to select new samples every iteration. */
   virtual bool GetNewSamplesEveryIteration( void ) const;
 
+  /** Check whether the user asked to perform only measurement. */
+  virtual bool GetMeasureMode( void ) const;
+  
+  
 private:
 
   /** The private constructor. */
@@ -134,7 +138,7 @@ private:
    * samples each iteration.
    */
   bool m_NewSamplesEveryIteration;
-
+  
 };
 
 } // end namespace elastix

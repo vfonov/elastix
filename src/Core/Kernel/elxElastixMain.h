@@ -275,6 +275,14 @@ public:
    */
   virtual void SetMaximumNumberOfThreads( void ) const;
 
+  
+  /** Set measure mode
+   * Syntax:
+   * -M on
+   */
+  virtual void SetMeasureMode( void );
+  
+  
   /** Functions to get/set the ComponentDatabase. */
   static ComponentDatabase * GetComponentDatabase( void )
   {
@@ -308,6 +316,9 @@ protected:
   
   /** Supress output of progress messages */
   bool m_Quiet;
+  
+  /** Measure mode */
+  bool m_MeasureMode;
 
   /** The configuration object, containing the parameters and command-line arguments. */
   ConfigurationPointer m_Configuration;

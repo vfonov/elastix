@@ -68,6 +68,8 @@ ElastixBase::ElastixBase()
   /** From Elastix 4.3 to 4.7: Ignore direction cosines by default, for
    * backward compatability. From Elastix 4.8: set it to true by default.*/
   this->m_UseDirectionCosines = true;
+  
+  this->m_MeasureMode = false;
 
 } // end Constructor
 
@@ -149,6 +151,15 @@ ElastixBase::BeforeAllBase( void )
     elxout << "-mMask    unspecified, so no moving mask used" << std::endl;
   }
 
+  /**
+   * VF: measurement mode enabled?
+   */
+  check = this->GetConfiguration()->GetCommandLineArgument( "-M" );
+  if( check == "on" )
+  {
+    this->m_MeasureMode=true;
+  }
+  
   /** Check for appearance of "-out".
    * This check has already been performed in elastix.cxx,
    * Here we do it again. MS: WHY?
@@ -156,8 +167,11 @@ ElastixBase::BeforeAllBase( void )
   check = this->GetConfiguration()->GetCommandLineArgument( "-out" );
   if( check == "" )
   {
-    xl::xout[ "error" ] << "ERROR: No CommandLine option \"-out\" given!" << std::endl;
-    returndummy |= 1;
+    if( ! this->m_MeasureMode )
+    {
+      xl::xout[ "error" ] << "ERROR: No CommandLine option \"-out\" given!" << std::endl;
+      returndummy |= 1;
+    }
   }
   else
   {

@@ -157,6 +157,8 @@ ElastixMain::ElastixMain()
   this->m_TransformParametersMap.clear();
   
   this->m_Quiet=false;
+  
+  this->m_MeasureMode=false;
 
 } // end Constructor
 
@@ -271,6 +273,7 @@ ElastixMain::Run( void )
   /** Set process properties. */
   this->SetProcessPriority();
   this->SetMaximumNumberOfThreads();
+  this->SetMeasureMode();
 
   /** Initialize database. */
   int errorCode = this->InitDBIndex();
@@ -323,6 +326,7 @@ ElastixMain::Run( void )
 
   /** Set some information in the ElastixBase. */
   this->GetElastixBase()->SetQuiet( this->m_Quiet );
+  this->GetElastixBase()->SetMeasureMode( this->m_MeasureMode );
   this->GetElastixBase()->SetConfiguration( this->m_Configuration );
   this->GetElastixBase()->SetComponentDatabase( this->s_CDB );
   this->GetElastixBase()->SetDBIndex( this->m_DBIndex );
@@ -990,6 +994,18 @@ ElastixMain::SetMaximumNumberOfThreads( void ) const
   }
 } // end SetMaximumNumberOfThreads()
 
+
+/**
+ * ***************************  SetMeasureMode ********************************
+ */
+void
+ElastixMain::SetMeasureMode( void )
+{
+  std::string mode
+    = this->m_Configuration->GetCommandLineArgument( "-M" );
+
+  this->m_MeasureMode=(mode=="on");
+}
 
 /**
  * ******************** SetOriginalFixedImageDirectionFlat ********************

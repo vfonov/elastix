@@ -219,7 +219,9 @@ ElastixTemplate< TFixedImage, TMovingImage >
 
   /** Start the timer for reading images. */
   this->m_Timer0.Start();
-  elxout << "\nReading images..." << std::endl;
+  
+  if(!this->m_Quiet)
+    elxout << "\nReading images..." << std::endl;
 
   /** Read images and masks, if not set already. */
   const bool              useDirCos = this->GetUseDirectionCosines();
@@ -265,8 +267,9 @@ ElastixTemplate< TFixedImage, TMovingImage >
 
   /** Print the time spent on reading images. */
   this->m_Timer0.Stop();
-  elxout << "Reading images took " << static_cast< unsigned long >(
-    this->m_Timer0.GetMean() * 1000 ) << " ms.\n" << std::endl;
+  if(!this->m_Quiet)
+    elxout << "Reading images took " << static_cast< unsigned long >(
+      this->m_Timer0.GetMean() * 1000 ) << " ms.\n" << std::endl;
 
   /** Give all components the opportunity to do some initialization. */
   this->BeforeRegistration();

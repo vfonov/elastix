@@ -363,6 +363,16 @@ public:
   virtual void SetQuiet(bool mode) {
     this->m_Quiet=mode;
   }
+  
+  /** Set measure mode */
+  virtual void SetMeasureMode(bool mode) {
+    this->m_MeasureMode=mode;
+  }
+  
+  virtual bool GetMeasureMode(void) const {
+    return this->m_MeasureMode;
+  }
+  
 
 protected:
 
@@ -377,6 +387,9 @@ protected:
 
   /** Supress output of progress messages */
   bool m_Quiet;
+  
+  /** Measure mode */
+  bool m_MeasureMode;
 
   /** Convenient mini class to load the files specified by a filename container
    * The function GenerateImageContainer can be used without instantiating an

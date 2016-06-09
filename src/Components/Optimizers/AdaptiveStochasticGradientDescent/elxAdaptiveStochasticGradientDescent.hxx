@@ -106,11 +106,17 @@ AdaptiveStochasticGradientDescent< TElastix >
     ->GetAsITKBaseType()->GetNumberOfParameters();
 
   /** Set the maximumNumberOfIterations. */
-  SizeValueType maximumNumberOfIterations = 500;
-  this->GetConfiguration()->ReadParameter( maximumNumberOfIterations,
-    "MaximumNumberOfIterations", this->GetComponentLabel(), level, 0 );
-  this->SetNumberOfIterations( maximumNumberOfIterations );
-
+  if(this->GetMeasureMode())
+  {
+    SizeValueType maximumNumberOfIterations = 1;
+    this->SetNumberOfIterations( maximumNumberOfIterations );
+  } else {
+    SizeValueType maximumNumberOfIterations = 500;
+    this->GetConfiguration()->ReadParameter( maximumNumberOfIterations,
+      "MaximumNumberOfIterations", this->GetComponentLabel(), level, 0 );
+    this->SetNumberOfIterations( maximumNumberOfIterations );
+  }
+  
   /** Set the gain parameter A. */
   double A = 20.0;
   this->GetConfiguration()->ReadParameter( A,

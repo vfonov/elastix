@@ -90,6 +90,7 @@ main( int argc, char ** argv )
   std::string                outFolder        = "";
   std::string                logFileName      = "";
   bool                       quiet_mode       = false;
+  bool                       measure_mode     = false;
 
   /** Put command line parameters into parameterFileList. */
   for( unsigned int i = 1; static_cast< long >( i ) < ( argc ); )
@@ -120,6 +121,13 @@ main( int argc, char ** argv )
     else if( key == "-v" || key == "--verbose" ) 
     {
       argMap.insert( ArgumentMapEntryType( "-q", "off" ) );
+    } 
+    else if( key == "-M" || key == "--measure" ) 
+    {
+      argMap.insert( ArgumentMapEntryType( "-q", "on" ) );
+      argMap.insert( ArgumentMapEntryType( "-M", "on" ) );
+      quiet_mode = true;
+      measure_mode = true;
     }
     else
     {
@@ -174,35 +182,38 @@ main( int argc, char ** argv )
     returndummy |= -1;
   }
 
-  /** Check if the -out option is given. */
-  if( outFolderPresent )
+  if( !measure_mode )
   {
-    /** Check if the output directory exists. */
-    bool outFolderExists = itksys::SystemTools::FileIsDirectory( outFolder.c_str() );
-    if( !outFolderExists )
+    /** Check if the -out option is given. */
+    if( outFolderPresent )
     {
-      std::cerr << "ERROR: the output directory \"" << outFolder << "\" does not exist." << std::endl;
-      std::cerr << "You are responsible for creating it." << std::endl;
-      returndummy |= -2;
+      /** Check if the output directory exists. */
+      bool outFolderExists = itksys::SystemTools::FileIsDirectory( outFolder.c_str() );
+      if( !outFolderExists )
+      {
+        std::cerr << "ERROR: the output directory \"" << outFolder << "\" does not exist." << std::endl;
+        std::cerr << "You are responsible for creating it." << std::endl;
+        returndummy |= -2;
+      }
+      else
+      {
+        /** Setup xout. */
+        logFileName = outFolder + "elastix.log";
+        int returndummy2 = elx::xoutSetup( logFileName.c_str(), true, !quiet_mode );
+        if( returndummy2 )
+        {
+          std::cerr << "ERROR while setting up xout." << std::endl;
+        }
+        returndummy |= returndummy2;
+      }
     }
     else
     {
-      /** Setup xout. */
-      logFileName = outFolder + "elastix.log";
-      int returndummy2 = elx::xoutSetup( logFileName.c_str(), true, !quiet_mode );
-      if( returndummy2 )
-      {
-        std::cerr << "ERROR while setting up xout." << std::endl;
-      }
-      returndummy |= returndummy2;
+      returndummy = -2;
+      std::cerr << "ERROR: No CommandLine option \"-out\" given!" << std::endl;
     }
   }
-  else
-  {
-    returndummy = -2;
-    std::cerr << "ERROR: No CommandLine option \"-out\" given!" << std::endl;
-  }
-
+  
   /** Stop if some fatal errors occurred. */
   if( returndummy )
   {
@@ -214,7 +225,7 @@ main( int argc, char ** argv )
   /** Declare a timer, start it and print the start time. */
   itk::TimeProbe totaltimer;
   totaltimer.Start();
-  elxout << "elastix is started at " << GetCurrentDateAndTime() << ".\n" << std::endl;
+  if(!quiet_mode) elxout << "elastix is started at " << GetCurrentDateAndTime() << ".\n" << std::endl;
 
   if(!quiet_mode)
   {
@@ -270,14 +281,17 @@ main( int argc, char ** argv )
     argMap.insert( ArgumentMapEntryType( argPair.first, argPair.second ) );
 
     /** Print a start message. */
-    elxout << "-------------------------------------------------------------------------" << "\n" << std::endl;
-    elxout << "Running elastix with parameter file " << i
-           << ": \"" << argMap[ "-p" ] << "\".\n" << std::endl;
-
+    if(!quiet_mode)
+    {
+      elxout << "-------------------------------------------------------------------------" << "\n" << std::endl;
+      elxout << "Running elastix with parameter file " << i
+            << ": \"" << argMap[ "-p" ] << "\".\n" << std::endl;
+    }
+    
     /** Declare a timer, start it and print the start time. */
     itk::TimeProbe timer;
     timer.Start();
-    elxout << "Current time: " << GetCurrentDateAndTime() << "." << std::endl;
+    if(!quiet_mode) elxout << "Current time: " << GetCurrentDateAndTime() << "." << std::endl;
 
     /** Start registration. */
     returndummy = elastices[ i ]->Run( argMap );
@@ -300,26 +314,33 @@ main( int argc, char ** argv )
     fixedImageOriginalDirection = elastices[ i ]->GetOriginalFixedImageDirectionFlat();
 
     /** Print a finish message. */
-    elxout << "Running elastix with parameter file " << i
+    if(!quiet_mode) 
+      elxout << "Running elastix with parameter file " << i
            << ": \"" << argMap[ "-p" ] << "\", has finished.\n" << std::endl;
 
     /** Stop timer and print it. */
     timer.Stop();
-    elxout << "\nCurrent time: " << GetCurrentDateAndTime() << "." << std::endl;
-    elxout << "Time used for running elastix with this parameter file:\n  "
-      << ConvertSecondsToDHMS( timer.GetMean(), 1 ) << ".\n" << std::endl;
-
+    if(!quiet_mode)
+    {
+      elxout << "\nCurrent time: " << GetCurrentDateAndTime() << "." << std::endl;
+      elxout << "Time used for running elastix with this parameter file:\n  "
+        << ConvertSecondsToDHMS( timer.GetMean(), 1 ) << ".\n" << std::endl;
+    }
+    
     /** Try to release some memory. */
     elastices[ i ] = 0;
 
   } // end loop over registrations
 
-  elxout << "-------------------------------------------------------------------------" << "\n" << std::endl;
+  if(!quiet_mode)
+    elxout << "-------------------------------------------------------------------------" << "\n" << std::endl;
 
   /** Stop totaltimer and print it. */
   totaltimer.Stop();
-  elxout << "Total time elapsed: "
-    << ConvertSecondsToDHMS( totaltimer.GetMean(), 1 ) << ".\n" << std::endl;
+  
+  if(!quiet_mode)
+    elxout << "Total time elapsed: "
+      << ConvertSecondsToDHMS( totaltimer.GetMean(), 1 ) << ".\n" << std::endl;
 
   /**
    * Make sure all the components that are defined in a Module (.DLL/.so)
@@ -383,8 +404,10 @@ PrintHelp( void )
   std::cout << "  -threads  set the maximum number of threads of elastix\n"
             << std::endl;
 
+  /** Additional parameters by VF */
   std::cout << "Optional extra commands by VF:"<<std::endl;
   std::cout << " -q/--quiet Don't display progress and system information" << std::endl;
+  std::cout << " -M/--measure run one iteration and print metrics only, implies --quiet" << std::endl;
             
   /** The parameter file.*/
   std::cout << "The parameter-file must contain all the information "
