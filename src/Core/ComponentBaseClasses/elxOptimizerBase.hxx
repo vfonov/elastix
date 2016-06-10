@@ -159,10 +159,21 @@ bool
 OptimizerBase< TElastix >
 ::GetMeasureMode( void ) const
 {
-  /** itkGetConstMacro Without the itkDebugMacro. */
   return this->GetElastix()->GetMeasureMode();
 } // end GetMeasureMode()
 
+/**
+ * ****************** GetQuiet ********************
+ */
+
+template< class TElastix >
+bool
+OptimizerBase< TElastix >
+::GetQuiet( void ) const
+{
+  /** itkGetConstMacro Without the itkDebugMacro. */
+  return this->GetElastix()->GetQuiet();
+} // end GetQuiet()
 
 
 

@@ -360,7 +360,7 @@ AffineLogTransformElastix< TElastix >
     itkExceptionMacro( << "ERROR: The Scales-option in the parameter-file"
                        << " has not been set properly." );
   }
-
+  if(!this->GetQuiet())
   elxout << "Scales for transform parameters are: " << newscales << std::endl;
 
   /** Set the scales into the optimizer. */

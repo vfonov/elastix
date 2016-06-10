@@ -591,6 +591,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
 
   /** Print time for initializing. */
   this->m_Timer0.Stop();
+  if(!this->GetQuiet())
   elxout << "Initialization of all components (before registration) took: "
          << static_cast< unsigned long >( this->m_Timer0.GetMean() * 1000 )
          << " ms.\n";
@@ -620,6 +621,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
   if( level == 0 )
   {
     this->m_Timer0.Stop();
+    if(!this->GetQuiet())
     elxout << "Preparation of the image pyramids took: "
            << static_cast< unsigned long >( this->m_Timer0.GetMean() * 1000 )
            << " ms.\n";
@@ -631,6 +633,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
   this->m_IterationCounter = 0;
 
   /** Print the current resolution. */
+  if(!this->GetQuiet())
   elxout << "\nResolution: " << level << std::endl;
 
   /** Create a TransformParameter-file for the current resolution. */
@@ -649,6 +652,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
 
   /** Print the extra preparation time needed for this resolution. */
   this->m_Timer0.Stop();
+  if(!this->GetQuiet())
   elxout << "Elastix initialization of all components (for this resolution) took: "
          << static_cast< unsigned long >( this->m_Timer0.GetMean() * 1000 ) << " ms.\n";
 

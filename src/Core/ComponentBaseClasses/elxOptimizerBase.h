@@ -126,6 +126,8 @@ protected:
   /** Check whether the user asked to perform only measurement. */
   virtual bool GetMeasureMode( void ) const;
   
+  /** Check whether we want to run quietly */
+  virtual bool GetQuiet( void ) const;
   
 private:
 

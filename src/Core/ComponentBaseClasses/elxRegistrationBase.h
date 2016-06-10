@@ -210,6 +210,16 @@ protected:
     const MovingMaskImageType * maskImage, bool useMaskErosion,
     const MovingImagePyramidType * pyramid, unsigned int level ) const;
 
+  virtual bool GetQuiet(void) const 
+  {
+    return this->GetElastix()->GetQuiet();
+  }
+  
+  virtual bool GetMeasureMode(void) const 
+  {
+    return this->GetElastix()->GetMeasureMode();
+  }
+    
 private:
 
   /** The private constructor. */

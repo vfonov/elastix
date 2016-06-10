@@ -41,6 +41,7 @@ NormalizedMutualInformationMetric< TElastix >
   timer.Start();
   this->Superclass1::Initialize();
   timer.Stop();
+  if(!this->GetQuiet())
   elxout << "Initialization of NormalizedMutualInformation metric took: "
          << static_cast< long >( timer.GetMean() * 1000 ) << " ms." << std::endl;
 

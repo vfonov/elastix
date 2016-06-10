@@ -66,6 +66,7 @@ CMAEvolutionStrategy< TElastix >::InitializeProgressVariables( void )
   this->Superclass1::InitializeProgressVariables();
 
   /** Print some settings that can be automatically determined by the optimizer. */
+  if(!this->GetQuiet())
   elxout
     << "The CMAEvolutionStrategy optimizer uses the following settings:\n"
     << "PopulationSize = " << this->GetPopulationSize() << "\n"
@@ -120,10 +121,14 @@ CMAEvolutionStrategy< TElastix >
 
   /** Set MaximumNumberOfIterations.*/
   unsigned int maximumNumberOfIterations = 500;
+  if(this->GetMeasureMode())
+    maximumNumberOfIterations=1;
+  else 
+  {
   this->m_Configuration->ReadParameter( maximumNumberOfIterations,
     "MaximumNumberOfIterations", this->GetComponentLabel(), level, 0 );
   this->SetMaximumNumberOfIterations( maximumNumberOfIterations );
-
+  }
   /** Set the length of the initial step (InitialSigma). */
   double stepLength = 1.0;
   this->m_Configuration->ReadParameter( stepLength,

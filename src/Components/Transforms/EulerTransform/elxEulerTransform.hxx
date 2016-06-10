@@ -371,6 +371,7 @@ EulerTransformElastix< TElastix >
 
   /** Give feedback. */
   // \todo: should perhaps also print fixed parameters
+  if(!this->GetQuiet())
   elxout << "Transform parameters are initialized as: "
          << this->GetParameters() << std::endl;
 
@@ -398,6 +399,7 @@ EulerTransformElastix< TElastix >
 
   if( automaticScalesEstimation )
   {
+    if(!this->GetQuiet())
     elxout << "Scales are estimated automatically." << std::endl;
     this->AutomaticScalesEstimation( newscales );
   }
@@ -489,6 +491,7 @@ EulerTransformElastix< TElastix >
 
   } // end else: no automaticScalesEstimation
 
+  if(!this->GetQuiet())
   elxout << "Scales for transform parameters are: " << newscales << std::endl;
 
   /** Set the scales into the optimizer. */

@@ -261,6 +261,7 @@ MultiResolutionRegistrationWithFeatures< TElastix >
 
   /** Stop timer and print the elapsed time. */
   timer.Stop();
+  if(!this->GetQuiet())
   elxout << "Setting the fixed masks took: "
          << static_cast< long >( timer.GetMean() * 1000 )
          << " ms." << std::endl;
@@ -304,6 +305,7 @@ MultiResolutionRegistrationWithFeatures< TElastix >
 
   /** Stop timer and print the elapsed time. */
   timer.Stop();
+  if(!this->GetQuiet())
   elxout << "Setting the moving masks took: "
          << static_cast< long >( timer.GetMean() * 1000 )
          << " ms." << std::endl;

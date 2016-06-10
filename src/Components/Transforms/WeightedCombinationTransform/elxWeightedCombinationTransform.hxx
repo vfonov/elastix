@@ -207,7 +207,7 @@ WeightedCombinationTransformElastix< TElastix >
     }
 
   }   // end else: no automaticScalesEstimation
-
+  if(!this->GetQuiet())
   elxout << "Scales for transform parameters are: " << newscales << std::endl;
 
   /** And set the scales into the optimizer. */

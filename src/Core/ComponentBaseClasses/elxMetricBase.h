@@ -185,6 +185,16 @@ public:
   virtual MeasureType GetCurrentExactMetricValue( void ) const
   { return this->m_CurrentExactMetricValue; }
 
+  virtual bool GetQuiet(void) const 
+  {
+    return this->GetElastix()->GetQuiet();
+  }
+  
+  virtual bool GetMeasureMode(void) const 
+  {
+    return this->GetElastix()->GetMeasureMode();
+  }
+  
 protected:
 
   /** The parameters type. */

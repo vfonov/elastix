@@ -353,6 +353,7 @@ AdvancedAffineTransformElastix< TElastix >
 
   /** Give feedback. */
   // \todo: should perhaps also print fixed parameters
+  if(!this->GetQuiet())
   elxout << "Transform parameters are initialized as: "
          << this->GetParameters() << std::endl;
 
@@ -380,6 +381,7 @@ AdvancedAffineTransformElastix< TElastix >
 
   if( automaticScalesEstimation )
   {
+    if(!this->GetQuiet())
     elxout << "Scales are estimated automatically." << std::endl;
     this->AutomaticScalesEstimation( newscales );
   }
@@ -468,6 +470,7 @@ AdvancedAffineTransformElastix< TElastix >
 
   } // end else: no automaticScalesEstimation
 
+  if(!this->GetQuiet())
   elxout << "Scales for transform parameters are: " << newscales << std::endl;
 
   /** And set the scales into the optimizer. */

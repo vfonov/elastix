@@ -117,7 +117,6 @@ TransformBase< TElastix >
   /** Initialize. */
   this->m_TransformParametersPointer   = 0;
   this->m_ReadWriteTransformParameters = true;
-  this->m_Quiet = false;
 } // end Constructor()
 
 
@@ -148,6 +147,8 @@ TransformBase< TElastix >
 ::BeforeAllBase( void )
 {
   /** Check Command line options and print them to the logfile. */
+  if(!this->GetQuiet())
+  {
   elxout << "Command line options from TransformBase:" << std::endl;
   std::string check( "" );
 
@@ -161,7 +162,8 @@ TransformBase< TElastix >
   {
     elxout << "-t0       " << check << std::endl;
   }
-
+  }
+  
   /** Return a value. */
   return 0;
 
@@ -188,6 +190,7 @@ TransformBase< TElastix >
   check = this->m_Configuration->GetCommandLineArgument( "-ipp" );
   if( check != "" )
   {
+
     elxout << "-ipp      " << check << std::endl;
     // Deprecated since elastix 4.3
     xl::xout[ "warning" ] << "WARNING: \"-ipp\" is deprecated, use \"-def\" instead!"
@@ -1589,7 +1592,7 @@ TransformBase< TElastix >
   /** Track the progress of the generation of the deformation field. */
 #ifndef _ELASTIX_BUILD_LIBRARY
   typename ProgressCommandType::Pointer progressObserver = ProgressCommandType::New();
-  if(!this->m_Quiet)
+  if(!this->GetQuiet())
   {
     progressObserver->ConnectObserver( defGenerator );
     progressObserver->SetStartString( "  Progress: " );
@@ -1740,7 +1743,7 @@ TransformBase< TElastix >
 #ifndef _ELASTIX_BUILD_LIBRARY
   /** Track the progress of the generation of the deformation field. */
   typename ProgressCommandType::Pointer progressObserver = ProgressCommandType::New();
-  if(!m_Quiet)
+  if(! this->GetQuiet() )
   {
     progressObserver->ConnectObserver( jacGenerator );
     progressObserver->SetStartString( "  Progress: " );
@@ -1846,7 +1849,7 @@ TransformBase< TElastix >
 #ifndef _ELASTIX_BUILD_LIBRARY
   /** Track the progress of the generation of the deformation field. */
   typename ProgressCommandType::Pointer progressObserver = ProgressCommandType::New();
-  if(!m_Quiet)
+  if(!this->GetQuiet())
   {
     progressObserver->ConnectObserver( jacGenerator );
     progressObserver->SetStartString( "  Progress: " );

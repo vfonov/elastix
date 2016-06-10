@@ -309,14 +309,14 @@ public:
    */
   virtual void SetFinalParameters( void );
   
-  virtual void SetQuiet(bool mode )
-  {
-    m_Quiet=mode;
-  }
-  
   virtual bool GetQuiet(void) const 
   {
-    return m_Quiet;
+    return this->GetElastix()->GetQuiet();
+  }
+  
+  virtual bool GetMeasureMode(void) const 
+  {
+    return this->GetElastix()->GetMeasureMode();
   }
 
 protected:
@@ -348,7 +348,6 @@ protected:
   ParametersType * m_TransformParametersPointer;
   std::string      m_TransformParametersFileName;
   ParametersType   m_FinalParameters;
-  bool             m_Quiet;
 
 private:
 

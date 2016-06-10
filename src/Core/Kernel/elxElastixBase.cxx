@@ -105,7 +105,17 @@ ElastixBase::BeforeAllBase( void )
 {
   /** Declare the return value and initialize it. */
   int returndummy = 0;
+  std::string check = "";
 
+  /**
+   * VF: measurement mode enabled
+   */
+  check = this->GetConfiguration()->GetCommandLineArgument( "-M" );
+  if( check == "on" )
+  {
+    this->m_MeasureMode=true;
+  }
+  
   /** Set the default precision of floating values in the output. */
   this->m_Configuration->ReadParameter(
     this->m_DefaultOutputPrecision, "DefaultOutputPrecision", 0, false );
@@ -122,7 +132,6 @@ ElastixBase::BeforeAllBase( void )
   /** Check Command line options and print them to the logfile. */
   if(!this->GetQuiet())
   elxout << "Command line options from ElastixBase:" << std::endl;
-  std::string check = "";
 
   /** Read the fixed and moving image filenames. These are obliged options,
    * so print an error if they are not present.
@@ -130,9 +139,9 @@ ElastixBase::BeforeAllBase( void )
    */
 #ifndef _ELASTIX_BUILD_LIBRARY
   this->m_FixedImageFileNameContainer = this->GenerateFileNameContainer(
-    "-f", returndummy, true, true );
+    "-f", returndummy, true, !this->GetQuiet() );
   this->m_MovingImageFileNameContainer = this->GenerateFileNameContainer(
-    "-m", returndummy, true, true );
+    "-m", returndummy, true, !this->GetQuiet() );
 #endif
   /** Read the fixed and moving mask filenames. These are not obliged options,
    * so do not print any errors if they are not present.
@@ -140,27 +149,21 @@ ElastixBase::BeforeAllBase( void )
    */
   int maskreturndummy = 0;
   this->m_FixedMaskFileNameContainer = this->GenerateFileNameContainer(
-    "-fMask", maskreturndummy, false, true );
+    "-fMask", maskreturndummy, false, !this->GetQuiet() );
   if( maskreturndummy != 0 )
   {
+    if(!this->GetQuiet())
     elxout << "-fMask    unspecified, so no fixed mask used" << std::endl;
   }
   maskreturndummy                     = 0;
   this->m_MovingMaskFileNameContainer = this->GenerateFileNameContainer(
-    "-mMask", maskreturndummy, false, true );
+    "-mMask", maskreturndummy, false, !this->GetQuiet() );
   if( maskreturndummy != 0 )
   {
+    if(!this->GetQuiet())
     elxout << "-mMask    unspecified, so no moving mask used" << std::endl;
   }
 
-  /**
-   * VF: measurement mode enabled?
-   */
-  check = this->GetConfiguration()->GetCommandLineArgument( "-M" );
-  if( check == "on" )
-  {
-    this->m_MeasureMode=true;
-  }
   
   /** Check for appearance of "-out".
    * This check has already been performed in elastix.cxx,
@@ -302,7 +305,7 @@ ElastixBase::BeforeAllTransformixBase( void )
    */
   int inreturndummy = 0;
   this->m_MovingImageFileNameContainer = this->GenerateFileNameContainer(
-    "-in", inreturndummy, false, true );
+    "-in", inreturndummy, false, !this->GetQuiet() );
   if( inreturndummy != 0 )
   {
     elxout << "-in       unspecified, so no input image specified" << std::endl;

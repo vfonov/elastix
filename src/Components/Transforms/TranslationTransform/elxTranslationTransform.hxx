@@ -108,6 +108,7 @@ TranslationTransformElastix< TElastix >
 
   /** Give feedback. */
   // \todo: should perhaps also print fixed parameters
+  if(!this->GetQuiet())
   elxout << "Transform parameters are initialized as: "
          << this->GetParameters() << std::endl;
 
