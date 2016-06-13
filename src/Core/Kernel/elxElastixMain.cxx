@@ -53,6 +53,7 @@ xoutsimple_type g_WarningXout;
 xoutsimple_type g_ErrorXout;
 xoutsimple_type g_StandardXout;
 xoutsimple_type g_CoutOnlyXout;
+xoutsimple_type g_CerrOnlyXout;
 xoutsimple_type g_LogOnlyXout;
 std::ofstream   g_LogFileStream;
 
@@ -96,6 +97,7 @@ xoutSetup( const char * logfilename, bool setupLogging, bool setupCout )
   /** Set outputs of LogOnly and CoutOnly. */
   returndummy |= g_LogOnlyXout.AddOutput( "log", &g_LogFileStream );
   returndummy |= g_CoutOnlyXout.AddOutput( "cout", &std::cout );
+  returndummy |= g_CerrOnlyXout.AddOutput( "cerr", &std::cerr );
 
   /** Copy the outputs to the warning-, error- and standard-xouts. */
   g_WarningXout.SetOutputs( xout.GetCOutputs() );
@@ -1007,8 +1009,6 @@ ElastixMain::SetMeasureMode( void )
 {
   std::string mode
     = this->m_Configuration->GetCommandLineArgument( "-M" );
-
-  std::cout<<"Measuring mode="<<mode.c_str()<<std::endl;
   this->m_MeasureMode=(mode=="on");
 }
 

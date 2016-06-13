@@ -107,7 +107,8 @@ OptimizerBase< TElastix >
     = reinterpret_cast< const unsigned char * >( roundedTP.data_block() );
   uLong crc = crc32( 0L, Z_NULL, 0 );
   crc = crc32( crc, crcInputData, N * sizeof( ParametersValueType ) );
-
+  
+  if(!this->GetQuiet())
   elxout << "\nRegistration result checksum: "
          << crc
          << std::endl;

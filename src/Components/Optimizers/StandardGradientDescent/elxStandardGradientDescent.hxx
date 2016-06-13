@@ -99,6 +99,7 @@ StandardGradientDescent< TElastix >
   this->SetMaximumNumberOfSamplingAttempts( maximumNumberOfSamplingAttempts );
   if( maximumNumberOfSamplingAttempts > 5 )
   {
+    if(!this->GetQuiet())
     elxout[ "warning" ]
       << "\nWARNING: You have set MaximumNumberOfSamplingAttempts to "
       << maximumNumberOfSamplingAttempts << ".\n"
@@ -165,6 +166,7 @@ StandardGradientDescent< TElastix >
   }
 
   /** Print the stopping condition */
+  if(!this->GetQuiet())
   elxout << "Stopping condition: " << stopcondition << "." << std::endl;
 
 }   // end AfterEachResolution()

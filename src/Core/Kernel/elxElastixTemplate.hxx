@@ -685,6 +685,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
   /** Print the total iteration time. */
   elxout << std::setprecision( 3 );
   this->m_ResolutionTimer.Stop();
+  if(!this->GetQuiet())
   elxout
     << "Time spent in resolution "
     << ( level )
@@ -819,6 +820,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
 ::AfterRegistration( void )
 {
   /** A white line. */
+  if(!this->GetQuiet())
   elxout << std::endl;
 
   /** Create the final TransformParameters filename. */
@@ -850,6 +852,7 @@ ElastixTemplate< TFixedImage, TMovingImage >
 
   /** Print the time spent on things after the registration. */
   this->m_Timer0.Stop();
+  if(!this->GetQuiet())
   elxout << "Time spent on saving the results, applying the final transform etc.: "
          << static_cast< unsigned long >( this->m_Timer0.GetMean() * 1000 ) << " ms.\n";
 

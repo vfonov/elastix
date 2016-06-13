@@ -485,6 +485,7 @@ ConjugateGradient< TElastix >
   /** Print the best metric value */
 
   double bestValue = this->GetCurrentValue();
+  if(!this->GetQuiet())
   elxout
     << std::endl
     << "Final metric value  = "

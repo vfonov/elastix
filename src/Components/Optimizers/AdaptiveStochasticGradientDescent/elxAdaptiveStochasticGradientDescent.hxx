@@ -129,6 +129,7 @@ AdaptiveStochasticGradientDescent< TElastix >
   this->SetMaximumNumberOfSamplingAttempts( maximumNumberOfSamplingAttempts );
   if( maximumNumberOfSamplingAttempts > 5 )
   {
+    if(!this->GetQuiet())
     elxout[ "warning" ]
       << "\nWARNING: You have set MaximumNumberOfSamplingAttempts to "
       << maximumNumberOfSamplingAttempts << ".\n"
@@ -348,6 +349,7 @@ AdaptiveStochasticGradientDescent< TElastix >
   }
 
   /** Print the stopping condition. */
+  if(!this->GetQuiet())
   elxout << "Stopping condition: " << stopcondition << "." << std::endl;
 
   /** Store the used parameters, for later printing to screen. */
@@ -363,10 +365,12 @@ AdaptiveStochasticGradientDescent< TElastix >
   /** Print settings that were used in this resolution. */
   SettingsVectorType tempSettingsVector;
   tempSettingsVector.push_back( settings );
+  if(!this->GetQuiet()) {
   elxout
     << "Settings of " << this->elxGetClassName()
     << " in resolution " << level << ":" << std::endl;
   this->PrintSettingsVector( tempSettingsVector );
+  }
 
 } // end AfterEachResolution()
 
@@ -382,16 +386,19 @@ AdaptiveStochasticGradientDescent< TElastix >
 {
   /** Print the best metric value. */
   double bestValue = this->GetValue();
+  if(!this->GetQuiet()) //VF:?
   elxout << std::endl
          << "Final metric value  = "
          << bestValue
          << std::endl;
-
+  
+  if(!this->GetQuiet())
+  {
   elxout
     << "Settings of " << this->elxGetClassName()
     << " for all resolutions:" << std::endl;
   this->PrintSettingsVector( this->m_SettingsVector );
-
+  }
 } // end AfterRegistration()
 
 
@@ -497,6 +504,7 @@ AdaptiveStochasticGradientDescent< TElastix >
   /** Total time. */
   itk::TimeProbe timer1;
   timer1.Start();
+  if(!this->GetQuiet())
   elxout << "Starting automatic parameter estimation for "
          << this->elxGetClassName()
          << " ..." << std::endl;
@@ -527,6 +535,7 @@ AdaptiveStochasticGradientDescent< TElastix >
 
   /** Print the elapsed time. */
   timer1.Stop();
+  if(!this->GetQuiet())
   elxout << "Automatic parameter estimation took "
          << this->ConvertSecondsToDHMS( timer1.GetMean(), 2 ) << std::endl;
 
@@ -593,10 +602,12 @@ AdaptiveStochasticGradientDescent< TElastix >
   }
 
   /** Compute the Jacobian terms. */
+  if(!this->GetQuiet())
   elxout << "  Computing JacobianTerms ..." << std::endl;
   timer2.Start();
   computeJacobianTerms->Compute( TrC, TrCC, maxJJ, maxJCJ );
   timer2.Stop();
+  if(!this->GetQuiet())
   elxout << "  Computing the Jacobian terms took "
          << this->ConvertSecondsToDHMS( timer2.GetMean(), 6 ) << std::endl;
 
@@ -624,6 +635,7 @@ AdaptiveStochasticGradientDescent< TElastix >
     this->m_NumberOfGradientMeasurements = vnl_math_max(
       static_cast< SizeValueType >( 2 ),
       this->m_NumberOfGradientMeasurements );
+    if(!this->GetQuiet())
     elxout << "  NumberOfGradientMeasurements to estimate sigma_i: "
            << this->m_NumberOfGradientMeasurements << std::endl;
   }
@@ -640,6 +652,7 @@ AdaptiveStochasticGradientDescent< TElastix >
   this->SampleGradients(
     this->GetScaledCurrentPosition(), sigma4, gg, ee );
   timer3.Stop();
+  if(!this->GetQuiet())
   elxout << "  Sampling the gradients took "
          << this->ConvertSecondsToDHMS( timer3.GetMean(), 6 ) << std::endl;
 
@@ -866,6 +879,7 @@ AdaptiveStochasticGradientDescent< TElastix >
           {
             if( this->GetUseAdaptiveStepSizes() )
             {
+              if(!this->GetQuiet())
               xl::xout[ "warning" ]
                 << "WARNING: UseAdaptiveStepSizes is turned off, "
                 << "because UseRandomSampleRegion is set to \"true\"."
@@ -909,8 +923,10 @@ AdaptiveStochasticGradientDescent< TElastix >
   ProgressCommandPointer progressObserver = ProgressCommandType::New();
   progressObserver->SetUpdateFrequency(
     this->m_NumberOfGradientMeasurements, this->m_NumberOfGradientMeasurements );
+  if(!this->GetQuiet())
   progressObserver->SetStartString( "  Progress: " );
 #endif
+  if(!this->GetQuiet())
   elxout << "  Sampling gradients ..." << std::endl;
 
   /** Initialize some variables for storing gradients and their magnitudes. */
@@ -927,6 +943,7 @@ AdaptiveStochasticGradientDescent< TElastix >
   {
 #ifndef _ELASTIX_BUILD_LIBRARY
     /** Show progress 0-100% */
+    if(!this->GetQuiet())
     progressObserver->UpdateAndPrintProgress( i );
 #endif
     /** Generate a perturbation, according to:
@@ -980,6 +997,7 @@ AdaptiveStochasticGradientDescent< TElastix >
   } // end for loop over gradient measurements
 
 #ifdef _ELASTIX_BUILD_LIBARY
+  if(!this->GetQuiet())
   progressObserver->PrintProgress( 1.0 );
 #endif
 

@@ -275,12 +275,14 @@ ResamplerBase< TElastix >
 
     /** Print the elapsed time for the resampling. */
     timer.Stop();
+    if(!this->GetQuiet())
     elxout << "  Applying final transform took "
            << this->ConvertSecondsToDHMS( timer.GetMean(), 2 ) << std::endl;
   }
   else
   {
     /** Do not apply the final transform. */
+    if(!this->GetQuiet())
     elxout << std::endl
            << "Skipping applying final transform, no resulting output image generated."
            << std::endl;

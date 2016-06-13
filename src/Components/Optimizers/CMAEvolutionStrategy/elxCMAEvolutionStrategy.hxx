@@ -298,6 +298,7 @@ CMAEvolutionStrategy< TElastix >
   }
 
   /** Print the stopping condition */
+  if(!this->GetQuiet())
   elxout << "Stopping condition: " << stopcondition << "." << std::endl;
 
 }   // end AfterEachResolution
@@ -315,6 +316,7 @@ CMAEvolutionStrategy< TElastix >
   /** Print the best metric value */
 
   double bestValue = this->GetCurrentValue();
+  if(!this->GetQuiet())
   elxout
     << std::endl
     << "Final metric value  = "

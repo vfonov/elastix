@@ -135,6 +135,7 @@ Powell< TElastix >
 {
   /** Print the best metric value */
   double bestValue = this->GetValue();
+  if(!this->GetQuiet())
   elxout << std::endl << "Final metric value  = " << bestValue  << std::endl;
 
 }   // end AfterRegistration

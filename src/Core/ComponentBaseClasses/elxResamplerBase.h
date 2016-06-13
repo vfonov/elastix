@@ -181,6 +181,15 @@ public:
   /** Function to create the result image in the format of an itk::Image. */
   virtual void CreateItkResultImage( void );
 
+  virtual bool GetQuiet(void) const 
+  {
+    return this->GetElastix()->GetQuiet();
+  }
+  
+  virtual bool GetMeasureMode(void) const 
+  {
+    return this->GetElastix()->GetMeasureMode();
+  }
 protected:
 
   /** The constructor. */
