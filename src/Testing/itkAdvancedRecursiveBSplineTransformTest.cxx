@@ -56,11 +56,11 @@ main( int argc, char * argv[] )
   std::cerr << "N = " << N << std::endl;
 
   /** Check. */
-  if( argc != 3 )
+  if( argc != 2 )
   {
-    std::cerr << "ERROR: You should specify two text files with the B-spline "
+    std::cerr << "ERROR: You should specify a text file with the B-spline "
               << "transformation parameters." << std::endl;
-    return 1;
+    return EXIT_FAILURE;
   }
 
   /** Other typedefs. */
@@ -183,41 +183,6 @@ main( int argc, char * argv[] )
   }
   transformITK->SetParameters( parameters );
   transform->SetParameters( parameters );
-  std::cerr << ", from file 2 ";
-
-  ParametersType parameters2( transform->GetNumberOfParameters() );
-  std::ifstream  input2( argv[ 2 ] );
-  if( !input2.is_open() )
-  {
-    std::cerr << "ERROR: could not open the text file containing the "
-              << "parameter2 values." << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  int dimsInPar2;
-  input2 >> dimsInPar2;
-  if( dimsInPar2 != Dimension )
-  {
-    std::cerr << "ERROR: The second file containing the parameters specifies "
-              << dimsInPar2 << " dimensions, while this test is compiled for "
-              << Dimension << "dimensions." << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  for( unsigned int i = 0; i < Dimension; ++i )
-  {
-    int temp;
-    input2 >> temp;
-    if( temp != gridSize[ i ] )
-    {
-      std::cerr << "ERROR: The second file containing the parameters differs in gridsize from the first file." << std::endl;
-      return EXIT_FAILURE;
-    }
-  }
-  for( unsigned int i = 0; i < parameters2.GetSize(); ++i )
-  {
-    input2 >> parameters2[ i ];
-  }
   recursiveTransform->SetParameters( parameters );
   std::cerr <<  " - done.\n" << std::endl;
 
@@ -250,24 +215,23 @@ main( int argc, char * argv[] )
   /** The transform point. */
   recursiveTransform->TransformPoint( inputPoint );
 
-  /** The Jacobian. *
+  /** The Jacobian. */
   recursiveTransform->GetJacobian( inputPoint, jacobian, nzji );
 
   /** The spatial Jacobian. */
-  //recursiveTransform->GetSpatialJacobian( inputPoint, spatialJacobian );
-  // crashes
+  recursiveTransform->GetSpatialJacobian( inputPoint, spatialJacobian );
 
-  /** The spatial Hessian. *
+  /** The spatial Hessian. */
   recursiveTransform->GetSpatialHessian( inputPoint, spatialHessian );
 
-  /** The Jacobian of the spatial Jacobian. *
+  /** The Jacobian of the spatial Jacobian. */
   recursiveTransform->GetJacobianOfSpatialJacobian( inputPoint,
     jacobianOfSpatialJacobian, nzji );
 
   recursiveTransform->GetJacobianOfSpatialJacobian( inputPoint,
     spatialJacobian, jacobianOfSpatialJacobian, nzji );
 
-  /** The Jacobian of the spatial Hessian. *
+  /** The Jacobian of the spatial Hessian. */
   recursiveTransform->GetJacobianOfSpatialHessian( inputPoint,
     jacobianOfSpatialHessian, nzji );
 
@@ -293,16 +257,12 @@ main( int argc, char * argv[] )
   weights2.SetSize( dummyNum );
   indices2.SetSize( dummyNum );
 
-  bool isInside = true;
-
   // Generate a list of random points
   MersenneTwisterType::Pointer mersenneTwister = MersenneTwisterType::New();
   mersenneTwister->Initialize( 140377 );
   std::vector< InputPointType >  pointList( N );
   std::vector< OutputPointType > transformedPointList1( N );
-  std::vector< OutputPointType > transformedPointList3( N );
-  std::vector< OutputPointType > transformedPointList5( N );
-  std::vector< OutputPointType > transformedPointList6( N );
+  std::vector< OutputPointType > transformedPointList2( N );
 
   IndexType               dummyIndex;
   CoefficientImagePointer coefficientImage = transform->GetCoefficientImages()[ 0 ];
@@ -316,98 +276,98 @@ main( int argc, char * argv[] )
   }
 
   /** Time the implementation of the TransformPoint. */
-  timeCollector.Start( "TransformPoint elastix          " );
+  timeCollector.Start( "TransformPoint elastix           " );
   for( unsigned int i = 0; i < N; ++i )
   {
     transformedPointList1[ i ] = transform->TransformPoint( pointList[ i ] );
   }
-  timeCollector.Stop(  "TransformPoint elastix          " );
+  timeCollector.Stop(  "TransformPoint elastix           " );
 
-  timeCollector.Start( "TransformPoint recursive vector " );
+  timeCollector.Start( "TransformPoint recursive         " );
   for( unsigned int i = 0; i < N; ++i )
   {
-    transformedPointList3[ i ] = recursiveTransform->TransformPoint( pointList[ i ] );
+    transformedPointList2[ i ] = recursiveTransform->TransformPoint( pointList[ i ] );
   }
-  timeCollector.Stop(  "TransformPoint recursive vector " );
+  timeCollector.Stop(  "TransformPoint recursive         " );
 
   /** Time the implementation of the Jacobian. */
-  timeCollector.Start( "Jacobian elastix                " );
+  timeCollector.Start( "Jacobian elastix                 " );
   for( unsigned int i = 0; i < N; ++i )
   {
     transform->GetJacobian( pointList[ i ], jacobian, nzji );
   }
-  timeCollector.Stop(  "Jacobian elastix                " );
+  timeCollector.Stop(  "Jacobian elastix                 " );
 
-  timeCollector.Start( "Jacobian recursive              " );
+  timeCollector.Start( "Jacobian recursive               " );
   for( unsigned int i = 0; i < N; ++i )
   {
     recursiveTransform->GetJacobian( pointList[ i ], jacobian, nzji );
   }
-  timeCollector.Stop(  "Jacobian recursive              " );
+  timeCollector.Stop(  "Jacobian recursive               " );
 
   /** Time the implementation of the spatial Jacobian. */
   SpatialJacobianType sj, sjRecursive;
-  timeCollector.Start( "SpatialJacobian elastix         " );
+  timeCollector.Start( "SpatialJacobian elastix          " );
   for( unsigned int i = 0; i < N; ++i )
   {
     transform->GetSpatialJacobian( pointList[ i ], sj );
   }
-  timeCollector.Stop(  "SpatialJacobian elastix         " );
+  timeCollector.Stop(  "SpatialJacobian elastix          " );
 
-  timeCollector.Start( "SpatialJacobian recursive vector" );
+  timeCollector.Start( "SpatialJacobian recursive        " );
   for( unsigned int i = 0; i < N; ++i )
   {
     recursiveTransform->GetSpatialJacobian( pointList[ i ], sjRecursive );
   }
-  timeCollector.Stop(  "SpatialJacobian recursive vector" );
+  timeCollector.Stop(  "SpatialJacobian recursive        " );
 
   /** Time the implementation of the spatial Hessian. */
   SpatialHessianType sh, shRecursive;
-  timeCollector.Start( "SpatialHessian elastix          " );
+  timeCollector.Start( "SpatialHessian elastix           " );
   for( unsigned int i = 0; i < N; ++i )
   {
     transform->GetSpatialHessian( pointList[ i ], sh );
   }
-  timeCollector.Stop(  "SpatialHessian elastix          " );
+  timeCollector.Stop(  "SpatialHessian elastix           " );
 
-  timeCollector.Start( "SpatialHessian recursive vector " );
+  timeCollector.Start( "SpatialHessian recursive         " );
   for( unsigned int i = 0; i < N; ++i )
   {
     recursiveTransform->GetSpatialHessian( pointList[ i ], shRecursive );
   }
-  timeCollector.Stop(  "SpatialHessian recursive vector " );
+  timeCollector.Stop(  "SpatialHessian recursive         " );
 
   /** Time the implementation of the Jacobian of the spatial Jacobian. */
   JacobianOfSpatialJacobianType jsj, jsjRecursive;
-  timeCollector.Start( "JacobianSpatialJacobian elastix " );
+  timeCollector.Start( "JacobianSpatialJacobian elastix  " );
   for( unsigned int i = 0; i < N; ++i )
   {
     transform->GetJacobianOfSpatialJacobian( pointList[ i ], jsj, nzji );
   }
-  timeCollector.Stop(  "JacobianSpatialJacobian elastix " );
+  timeCollector.Stop(  "JacobianSpatialJacobian elastix  " );
 
-  timeCollector.Start( "JacobianSpatialJacobian rec     " );
+  timeCollector.Start( "JacobianSpatialJacobian recursive " );
   for( unsigned int i = 0; i < N; ++i )
   {
     recursiveTransform->GetJacobianOfSpatialJacobian( pointList[ i ], jsjRecursive, nzji );
   }
-  timeCollector.Stop(  "JacobianSpatialJacobian rec     " );
+  timeCollector.Stop(  "JacobianSpatialJacobian recursive " );
 
   /** Time the implementation of the Jacobian of the spatial Hessian. */
   JacobianOfSpatialHessianType jsh, jshRecursive;
-  timeCollector.Start( "JacobianSpatialHessian elastix " );
+  timeCollector.Start( "JacobianSpatialHessian elastix   " );
   for( unsigned int i = 0; i < N; ++i )
   {
     transform->GetJacobianOfSpatialHessian( pointList[ i ], jsh, nzji );
   }
-  timeCollector.Stop(  "JacobianSpatialHessian elastix " );
+  timeCollector.Stop(  "JacobianSpatialHessian elastix   " );
 
-  timeCollector.Start( "JacobianSpatialHessian rec     " );
+  timeCollector.Start( "JacobianSpatialHessian recursive " );
   for( unsigned int i = 0; i < N; ++i )
   {
     recursiveTransform->GetJacobianOfSpatialHessian( pointList[ i ], jshRecursive, nzji );
   }
-  timeCollector.Stop(  "JacobianSpatialHessian rec     " );
+  timeCollector.Stop(  "JacobianSpatialHessian recursive " );
 
   /** Report. */
   timeCollector.Report();
@@ -421,18 +381,16 @@ main( int argc, char * argv[] )
   /** These should return the same values as the original ITK functions. */
 
   /** TransformPoint. */
-  OutputPointType opp1, opp3, opp5, opp6;
+  OutputPointType opp1, opp2;
   double          differenceNorm1 = 0.0;
-  double          differenceNorm5 = 0.0;
-  double          differenceNorm6 = 0.0;
   for( unsigned int i = 0; i < N; ++i )
   {
     opp1 = transformedPointList1[ i ]; // transform->TransformPoint();
-    opp3 = transformedPointList3[ i ]; // recursiveTransform->TransformPoint();
+    opp2 = transformedPointList2[ i ]; // recursiveTransform->TransformPoint();
 
     for( unsigned int j = 0; j < Dimension; ++j )
     {
-      differenceNorm1 += ( opp1[ j ] - opp3[ j ] ) * ( opp1[ j ] - opp3[ j ] );
+      differenceNorm1 += ( opp1[ j ] - opp2[ j ] ) * ( opp1[ j ] - opp2[ j ] );
     }
   }
   differenceNorm1 = vcl_sqrt( differenceNorm1 ) / N;
