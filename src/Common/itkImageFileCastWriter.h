@@ -99,7 +99,7 @@ protected:
     typename CasterType::Pointer caster                    = CasterType::New();
     this->m_Caster                                         = caster;
     typename ScalarInputImageType::Pointer localInputImage = ScalarInputImageType::New();
-    localInputImage->Graft( inputImage );
+    localInputImage->Graft( static_cast<const ScalarInputImageType *>(inputImage) );
     caster->SetInput( localInputImage );
     caster->Update();
 
