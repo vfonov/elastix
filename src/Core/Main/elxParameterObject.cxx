@@ -274,6 +274,7 @@ ParameterObject
   parameterMap[ "ResampleInterpolator" ]           = ParameterValueVectorType( 1, "FinalBSplineInterpolator" );
   parameterMap[ "FinalBSplineInterpolationOrder" ] = ParameterValueVectorType( 1, "3" );
   parameterMap[ "NumberOfResolutions" ]            = ParameterValueVectorType( 1, ToString( numberOfResolutions ) );
+  parameterMap[ "WriteIterationInfo" ]             = ParameterValueVectorType( 1, "false" );
 
   // Image Sampler
   parameterMap[ "ImageSampler" ]                    = ParameterValueVectorType( 1, "RandomCoordinate" );
@@ -319,9 +320,9 @@ ParameterObject
     parameterMap[ "Transform" ]    = ParameterValueVectorType( 1, "BSplineTransform" );
     parameterMap[ "Metric" ]       = ParameterValueVectorType( 1, "AdvancedMattesMutualInformation" );
     parameterMap[ "Metric" ].push_back( "TransformBendingEnergyPenalty" );
-    parameterMap[ "Metric0Weight" ]             = ParameterValueVectorType( 1, "1.0" );
-    parameterMap[ "Metric1Weight" ]             = ParameterValueVectorType( 1, "10000.0" );
-    parameterMap[ "MaximumNumberOfIterations" ] = ParameterValueVectorType( 1, "256" );
+    parameterMap[ "Metric0Weight" ]                    = ParameterValueVectorType( 1, "1.0" );
+    parameterMap[ "Metric1Weight" ]                    = ParameterValueVectorType( 1, "1.0" );
+    parameterMap[ "MaximumNumberOfIterations" ]        = ParameterValueVectorType( 1, "256" );
   }
   else if( transformName == "spline" )
   {

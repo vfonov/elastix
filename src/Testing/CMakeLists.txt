@@ -6,11 +6,24 @@ set( TestDataDir ${elastix_SOURCE_DIR}/Testing/Data )
 set( TestBaselineDir ${elastix_SOURCE_DIR}/Testing/Baselines )
 set( TestOutputDir ${elastix_BINARY_DIR}/Testing )
 
+set( SITE_BASELINE_DIR "" CACHE PATH "path to site-specific baseline data" )
+if ( SITE_BASELINE_DIR )
+  if ( EXISTS ${SITE_BASELINE_DIR} )
+    set( TestSiteBaselineDir ${SITE_BASELINE_DIR} )
+    message( STATUS "Site-specific baseline dir: " ${TestSiteBaselineDir} )
+  else()
+    message( FATAL_ERROR "Invalid Site-specific baseline dir specified: " ${TestSiteBaselineDir} )
+  endif()
+endif()
+
 #---------------------------------------------------------------------
 # configure the baseline files
 set( ELASTIX_DATA_DIR ${TestDataDir} )
 file( GLOB files ${TestBaselineDir}/*.in )
-foreach( tpfile ${files} )
+if ( TestSiteBaselineDir )
+  file( GLOB sitefiles ${TestSiteBaselineDir}/*.in )
+endif()
+foreach( tpfile ${files} ${sitefiles} )
   # Get file name without directory
   get_filename_component( tpfileout ${tpfile} NAME )
   # Strip extension .in
@@ -33,6 +46,17 @@ endif()
 if( ELASTIX_USE_MEVISDICOMTIFF )
   add_definitions( -D_ELASTIX_USE_MEVISDICOMTIFF )
   set( mevisdcmtifflib mevisdcmtiff )
+endif()
+
+#---------------------------------------------------------------------
+# Optionally run timing tests
+# - tests that are wholly devoted to timing can be added conditionally using cmake symbol ELASTIX_TEST_TIMING
+# - tests that have mixed correctness and timing testing can use the C Preprocessor symbol _ELASTIX_TEST_TIMING to
+#   conditionally enable the timing testing parts
+mark_as_advanced( ELASTIX_TEST_TIMING )
+option( ELASTIX_TEST_TIMING "Enable timing tests?  This option enables timing tests among the regular test suite." OFF )
+if ( ELASTIX_TEST_TIMING )
+  add_definitions( -D_ELASTIX_TEST_TIMING )
 endif()
 
 #---------------------------------------------------------------------
@@ -234,11 +258,17 @@ elseif( SITE STREQUAL "BIGR.cluster"
   set( specializedTransformParameterSystem true )
 endif()
 
+if( EXISTS ${TestSiteBaselineDir}/checksums.txt )
+  set( checksumBaselineFile ${TestSiteBaselineDir}/checksums.txt )
+  set( knownChecksumSystem true )  
+endif()
+
 if( knownChecksumSystem )
   message( STATUS "Checksum baseline file:" ${checksumBaselineFile} )
 endif()
 
 # Python script used for comparing elastix output with baseline results
+# Note that ITKTools is required for some of these scripts.
 set( pythonfinalmetric ${elastix_SOURCE_DIR}/Testing/elx_compare_finalmetricvalue.py )
 set( pythonchecksum   ${elastix_SOURCE_DIR}/Testing/elx_compare_checksum.py )
 set( pythonoverlap    ${elastix_SOURCE_DIR}/Testing/elx_compare_overlap.py )
@@ -673,25 +703,33 @@ endif()
 # This is just a consistency test over time, since the registration result
 # differs from machine to machine.
 
-# Select machine dependend baseline image
-set( baselineImage ${TestBaselineDir}/example.mha )
+# Select machine dependent baseline image, basename.mha
+# The path will be stored in variable "baselineImage_${basename}"
+function( find_image_baseline basename )
+  set( basevar baselineImage_${basename} )
+  find_file( ${basevar} NAMES ${basename}.mha PATHS ${TestSiteBaselineDir} ${TestBaselineDir} NO_DEFAULT_PATH )
+endfunction(find_image_baseline)
+
+find_image_baseline( example )
+
 if( knownChecksumSystem OR specializedTransformParameterSystem )
   if( ( SITE STREQUAL "LKEB.goliath" ) OR (SITE STREQUAL "LKEB.MacMini") OR (SITE STREQUAL "BIGR.cluster") OR (SITE STREQUAL "BIGR.PCStefan") )
-    set( baselineImage ${TestBaselineDir}/example_${SITE}.mha )
+    set( baselineImage_example ${TestBaselineDir}/example_${SITE}.mha )
   endif()
 endif()
 
 # Run the 2D brain example registration
 elx_add_run_test( example
-  "IMAGE" ${baselineImage}
+  "IMAGE" ${baselineImage_example}
   -f ${ELASTIX_DOX_DIR}/exampleinput/fixed.mhd
   -m ${ELASTIX_DOX_DIR}/exampleinput/moving.mhd
   -p ${ELASTIX_DOX_DIR}/exampleinput/parameters_Rigid.txt
   -p ${ELASTIX_DOX_DIR}/exampleinput/parameters_BSpline.txt )
 
 # Run 3D registration with a 'common' parameter file:
+find_image_baseline( 3DCT_lung )
 elx_add_run_test( 3DCT_lung.example
-  "IMAGE;PARAMETERS;OVERLAP;LANDMARKS" ${TestBaselineDir}/3DCT_lung.mha
+  "IMAGE;PARAMETERS;OVERLAP;LANDMARKS" ${baselineImage_3DCT_lung}
   -f ${TestDataDir}/3DCT_lung_baseline.mha
   -m ${TestDataDir}/3DCT_lung_followup.mha
   -t0 ${TestDataDir}/transformparameters.3DCT_lung.affine.txt

@@ -33,7 +33,7 @@ namespace elastix
 {
 
 template< typename TFixedImage, typename TMovingImage >
-class ElastixFilter : public itk::ImageSource< TFixedImage >
+class ELASTIXLIB_API ElastixFilter : public itk::ImageSource< TFixedImage >
 {
 public:
 
@@ -89,62 +89,41 @@ public:
 
   /** Set/Add/Get/NumberOf fixed images. */
   virtual void SetFixedImage( TFixedImage * fixedImage );
-
   virtual void AddFixedImage( TFixedImage * fixedImage );
-
   FixedImageConstPointer GetFixedImage( void ) const;
-
   FixedImageConstPointer GetFixedImage( const unsigned int index ) const;
-
   unsigned int GetNumberOfFixedImages( void ) const;
 
   /** Set/Add/Get/NumberOf moving images. */
   virtual void SetMovingImage( TMovingImage * movingImages );
-
   virtual void AddMovingImage( TMovingImage * movingImage );
-
   MovingImageConstPointer GetMovingImage( void ) const;
-
   MovingImageConstPointer GetMovingImage( const unsigned int index ) const;
-
   unsigned int GetNumberOfMovingImages( void ) const;
 
   /** Set/Add/Get/Remove/NumberOf fixed masks. */
   virtual void AddFixedMask( FixedMaskType * fixedMask );
-
   virtual void SetFixedMask( FixedMaskType * fixedMask );
-
   FixedMaskConstPointer GetFixedMask( void ) const;
-
   FixedMaskConstPointer GetFixedMask( const unsigned int index ) const;
-
   void RemoveFixedMask( void );
-
   unsigned int GetNumberOfFixedMasks( void ) const;
 
   /** Set/Add/Get/Remove/NumberOf moving masks. */
   virtual void SetMovingMask( MovingMaskType * movingMask );
-
   virtual void AddMovingMask( MovingMaskType * movingMask );
-
   MovingMaskConstPointer GetMovingMask( void ) const;
-
   MovingMaskConstPointer GetMovingMask( const unsigned int index ) const;
-
   virtual void RemoveMovingMask( void );
-
   unsigned int GetNumberOfMovingMasks( void ) const;
 
   /** Set/Get parameter object.*/
-  virtual void SetParameterObject( const ParameterObjectType * parameterObject );
-
+  virtual void SetParameterObject( ParameterObjectType * parameterObject );
   ParameterObjectType * GetParameterObject( void );
-
   const ParameterObjectType * GetParameterObject( void ) const;
 
   /** Get transform parameter object.*/
   ParameterObjectType * GetTransformParameterObject( void );
-
   const ParameterObjectType * GetTransformParameterObject( void ) const;
 
   /** Set/Get/Remove initial transform parameter filename. */
@@ -207,7 +186,7 @@ private:
   void RemoveInputsOfType( const DataObjectIdentifierType & inputName );
 
   /** Let elastix handle input verification internally */
-  virtual void VerifyInputInformation( void ) ITK_OVERRIDE {}
+  virtual void VerifyInputInformation( void ) ITK_OVERRIDE {};
 
   std::string m_InitialTransformParameterFileName;
   std::string m_FixedPointSetFileName;

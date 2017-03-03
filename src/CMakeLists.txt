@@ -1,5 +1,4 @@
 #---------------------------------------------------------------------
-cmake_minimum_required( VERSION 2.8 )
 cmake_policy( SET CMP0012 NEW )
 if( POLICY CMP0033 )
   # This policy was introduced in cmake 3, so we need to check for its
@@ -7,6 +6,8 @@ if( POLICY CMP0033 )
   # this if(POLICY) check can be removed.
   cmake_policy( SET CMP0033 OLD )
 endif()
+
+cmake_policy( SET CMP0007 OLD )
 
 #---------------------------------------------------------------------
 project( elastix )
@@ -24,16 +25,10 @@ if( NOT ELASTIX_BUILD_EXECUTABLE )
   #set( CMAKE_C_VISIBILITY_PRESET hidden )
   #set( CMAKE_CXX_VISIBILITY_PRESET hidden )
 
-  # Adding the option to switch between a static and a shared library.
-  # The default is a static library, as it is best tested.
-  mark_as_advanced( ELASTIX_BUILD_SHARED_LIBS )
-  option( ELASTIX_BUILD_SHARED_LIBS "Build shared libraries?" OFF )
-  if( ELASTIX_BUILD_SHARED_LIBS )
-    add_definitions( -D_ELASTIX_BUILD_SHARED_LIBRARY )
-
-    # The following sets the default library type for add_library to SHARED.
-    # This is used in Core/CMakeLists.
-    set( BUILD_SHARED_LIBS ON )
+  mark_as_advanced( BUILD_SHARED_LIBS )
+  option( BUILD_SHARED_LIBS "Build shared libraries?" OFF )
+  if( BUILD_SHARED_LIBS )
+    add_definitions( -D_ELASTIX_USE_SHARED_LIBRARY )
 
     # We need to make sure that also the ITK is compiled with shared
     # libraries on. Related to flag (ITK_)BUILD_SHARED_LIBS. todo
@@ -44,10 +39,6 @@ if( NOT ELASTIX_BUILD_EXECUTABLE )
     #   relocation R_X86_64_32S against `.bss' can not be used when
     #   making a shared object; recompile with -fPIC
     set( CMAKE_POSITION_INDEPENDENT_CODE ON )
-  else()
-    # The following sets the default library type for add_library to STATIC.
-    # This is used in Core/CMakeLists.
-    set( BUILD_SHARED_LIBS OFF )
   endif()
 endif()
 
@@ -66,7 +57,7 @@ list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake )
 option( ELASTIX_USE_OPENCL "Use OpenCL enabled GPU" OFF )
 
 if( ELASTIX_USE_OPENCL )
-  find_package( OpenCL REQUIRED )
+  find_package( OpenCL REQUIRED QUIET )
   # Force OPENCL_OPTIMIZATION_MAD_ENABLE to on
   if( DEFINED OPENCL_OPTIMIZATION_MAD_ENABLE )
     set( OPENCL_OPTIMIZATION_MAD_ENABLE ON CACHE BOOL
@@ -96,7 +87,7 @@ endif()
 
 #---------------------------------------------------------------------
 # Find OpenMP
-find_package( OpenMP )
+find_package( OpenMP QUIET )
 
 if( OPENMP_FOUND )
   set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
@@ -120,7 +111,7 @@ if( USE_PreconditionedGradientDescent )
 endif()
 
 #---------------------------------------------------------------------
-# Set single output directories for all executables and libraries.
+# Set single (build-tree) output directories for all executables and libraries.
 # This makes it easier to create an elxUseFile.cmake, that users can
 # include in their programs to borrow elastix functionality.
 
@@ -136,6 +127,19 @@ endif()
 
 # Mark these variables as advanced; their default value is usually fine
 mark_as_advanced( LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH )
+
+#---------------------------------------------------------------------
+# Define the install directory names, relative to install prefix
+# given by CMAKE_INSTALL_PREFIX.  All components should use the
+# same name.  Set as variable here for future customization; e.g.
+# if desire to decorate with Elastix version.
+# Allow user to customize.
+
+mark_as_advanced( ELASTIX_ARCHIVE_DIR ELASTIX_INCLUDE_DIR ELASTIX_LIBRARY_DIR ELASTIX_RUNTIME_DIR )
+set( ELASTIX_ARCHIVE_DIR "lib" CACHE STRING "Directory for installing archive files; path is relative to CMAKE_INSTALL_PREFIX" )
+set( ELASTIX_INCLUDE_DIR "include" CACHE STRING "Directory for installing include files; path is relative to CMAKE_INSTALL_PREFIX" )
+set( ELASTIX_LIBRARY_DIR "lib" CACHE STRING "Directory for installing library files; path is relative to CMAKE_INSTALL_PREFIX" )
+set( ELASTIX_RUNTIME_DIR "bin" CACHE STRING "Directory for installing runtime files; path is relative to CMAKE_INSTALL_PREFIX" )
 
 #---------------------------------------------------------------------
 # Check if Mevis DicomTiff support is desired
@@ -414,12 +418,8 @@ endif()
 #---------------------------------------------------------------------
 # Testing
 
-set( ELASTIX_BUILD_TESTING OFF CACHE BOOL
-  "Perform some tests on basic functionality of elastix." )
-if( ELASTIX_BUILD_TESTING )
-  enable_testing()
+if( BUILD_TESTING )
   add_subdirectory( Testing )
-  include( CTest )
 endif()
 
 #---------------------------------------------------------------------

@@ -65,7 +65,13 @@ void
 ElastixFilter< TFixedImage, TMovingImage >
 ::GenerateData( void )
 {
-  // Initialize variables here so they don't go out of scope between iterations of the main loop
+  // Force compiler to instantiate the image dimensions, otherwise we may get
+  //   Undefined symbols for architecture x86_64:
+  //     "elastix::ElastixFilter<itk::Image<float, 2u> >::FixedImageDimension"
+  // on some platforms.
+  const unsigned int fixedImageDimension = FixedImageDimension;
+  const unsigned int movingImageDimension = MovingImageDimension;
+
   DataObjectContainerPointer fixedImageContainer  = DataObjectContainerType::New();
   DataObjectContainerPointer movingImageContainer = DataObjectContainerType::New();
   DataObjectContainerPointer fixedMaskContainer   = 0;
@@ -193,17 +199,14 @@ ElastixFilter< TFixedImage, TMovingImage >
   // Run the (possibly multiple) registration(s)
   for( unsigned int i = 0; i < parameterMapVector.size(); ++i )
   {
-    // Set pixel types from input images, override user settings
-    parameterMapVector[ i ][ "FixedInternalImagePixelType" ]
-      = ParameterValueVectorType( 1, PixelType< typename TFixedImage::PixelType >::ToString() );
+    // Set image dimension from input images, override user settings
     parameterMapVector[ i ][ "FixedImageDimension" ]
-      = ParameterValueVectorType( 1, ParameterObject::ToString( FixedImageDimension ) );
-    parameterMapVector[ i ][ "MovingInternalImagePixelType" ]
-      = ParameterValueVectorType( 1, PixelType< typename TMovingImage::PixelType >::ToString() );
+      = ParameterValueVectorType( 1, ParameterObject::ToString( fixedImageDimension ) ) ;
     parameterMapVector[ i ][ "MovingImageDimension" ]
-      = ParameterValueVectorType( 1, ParameterObject::ToString( MovingImageDimension ) );
+      = ParameterValueVectorType( 1, ParameterObject::ToString( movingImageDimension ) );
     parameterMapVector[ i ][ "ResultImagePixelType" ]
-      = ParameterValueVectorType( 1, PixelType< typename TFixedImage::PixelType >::ToString() );
+      = ParameterValueVectorType( 1, ParameterObject::ToString( PixelType< typename TFixedImage::PixelType >::ToString() ) );
+
 
     // Create new instance of ElastixMain
     ElastixMainPointer elastix = ElastixMainType::New();
@@ -285,10 +288,9 @@ ElastixFilter< TFixedImage, TMovingImage >
 template< typename TFixedImage, typename TMovingImage >
 void
 ElastixFilter< TFixedImage, TMovingImage >
-::SetParameterObject( const ParameterObjectType * parameterObject )
+::SetParameterObject( ParameterObjectType * parameterObject )
 {
-  this->SetInput( "ParameterObject", const_cast< ParameterObjectType * >( parameterObject ) );
-  this->Modified();
+  this->SetInput( "ParameterObject", parameterObject );
 }
 
 
@@ -325,7 +327,12 @@ typename ElastixFilter< TFixedImage, TMovingImage >::ParameterObjectType *
 ElastixFilter< TFixedImage, TMovingImage >
 ::GetTransformParameterObject( void )
 {
-  return itkDynamicCastInDebugMode< ParameterObjectType * >( itk::ProcessObject::GetOutput( "TransformParameterObject" ) );
+  if( this->HasOutput( "TransformParameterObject") )
+  {
+    return itkDynamicCastInDebugMode< ParameterObjectType * >( itk::ProcessObject::GetOutput( "TransformParameterObject" ) );    
+  }
+
+  itkExceptionMacro( "TransformParameterObject has not been generated. Update() ElastixFilter before requesting this output.")  
 }
 
 /**
@@ -337,7 +344,12 @@ const typename ElastixFilter< TFixedImage, TMovingImage >::ParameterObjectType *
 ElastixFilter< TFixedImage, TMovingImage >
 ::GetTransformParameterObject( void ) const
 {
-  return itkDynamicCastInDebugMode< const ParameterObjectType * >( itk::ProcessObject::GetOutput( "TransformParameterObject" ) );
+  if( this->HasOutput( "TransformParameterObject") )
+  {
+    return itkDynamicCastInDebugMode< const ParameterObjectType * >( itk::ProcessObject::GetOutput( "TransformParameterObject" ) );    
+  }
+
+  itkExceptionMacro( "TransformParameterObject has not been generated. Update() ElastixFilter before requesting this output.")  
 }
 
 /**
@@ -746,7 +758,7 @@ void
 ElastixFilter< TFixedImage, TMovingImage >
 ::RemoveLogFileName( void )
 {
-  this->SetLogFileName( "" );
+  this->m_LogFileName = "";
   this->LogToFileOff();
 } // end RemoveLogFileName()
 

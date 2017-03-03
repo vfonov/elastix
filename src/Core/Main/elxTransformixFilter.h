@@ -32,14 +32,14 @@
 namespace elastix
 {
 
-template< typename TInputImage >
-class TransformixFilter : public itk::ImageSource< TInputImage >
+template< typename TMovingImage >
+class ELASTIXLIB_API TransformixFilter : public itk::ImageSource< TMovingImage >
 {
 public:
 
   /** Standard ITK typedefs. */
   typedef TransformixFilter               Self;
-  typedef itk::ImageSource< TInputImage > Superclass;
+  typedef itk::ImageSource< TMovingImage > Superclass;
   typedef itk::SmartPointer< Self >       Pointer;
   typedef itk::SmartPointer< const Self > ConstPointer;
 
@@ -66,22 +66,20 @@ public:
   typedef typename ParameterObjectType::Pointer         ParameterObjectPointer;
   typedef typename ParameterObjectType::ConstPointer    ParameterObjectConstPointer;
 
-  typedef typename TInputImage::Pointer      InputImagePointer;
-  typedef typename TInputImage::ConstPointer InputImageConstPointer;
+  typedef typename TMovingImage::Pointer      InputImagePointer;
+  typedef typename TMovingImage::ConstPointer InputImageConstPointer;
 
-  itkStaticConstMacro( InputImageDimension, unsigned int, TInputImage::ImageDimension );
+  itkStaticConstMacro( MovingImageDimension, unsigned int, TMovingImage::ImageDimension );
 
   /** Set/Get/Add moving image. */
-  virtual void SetInput( TInputImage * inputImage );
-
-  InputImageConstPointer GetInput( void );
-
-  virtual void RemoveInput( void );
+  virtual void SetMovingImage( TMovingImage * inputImage );
+  InputImageConstPointer GetMovingImage( void );
+  virtual void RemoveMovingImage( void );
 
   /** Set/Get/Remove moving point set filename. */
-  itkSetMacro( InputPointSetFileName, std::string );
-  itkGetMacro( InputPointSetFileName, std::string );
-  virtual void RemoveInputPointSetFileName() { this->SetInputPointSetFileName( "" ); }
+  itkSetMacro( FixedPointSetFileName, std::string );
+  itkGetMacro( FixedPointSetFileName, std::string );
+  virtual void RemoveFixedPointSetFileName() { this->SetFixedPointSetFileName( "" ); }
 
   /** Compute spatial Jacobian On/Off. */
   itkSetMacro( ComputeSpatialJacobian, bool );
@@ -141,7 +139,7 @@ private:
   virtual bool IsEmpty( const InputImagePointer inputImage );
 
   /** Let transformix handle input verification internally */
-  virtual void VerifyInputInformation( void ) ITK_OVERRIDE {}
+  virtual void VerifyInputInformation( void ) ITK_OVERRIDE {};
 
   /** Tell the compiler we want all definitions of Get/Set/Remove
    *  from ProcessObject and TransformixFilter. */
@@ -149,7 +147,7 @@ private:
   using itk::ProcessObject::GetInput;
   using itk::ProcessObject::RemoveInput;
 
-  std::string m_InputPointSetFileName;
+  std::string m_FixedPointSetFileName;
   bool        m_ComputeSpatialJacobian;
   bool        m_ComputeDeterminantOfSpatialJacobian;
   bool        m_ComputeDeformationField;
