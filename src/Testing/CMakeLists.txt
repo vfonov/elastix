@@ -474,7 +474,10 @@ elx_add_test( BSplineInterpolationWeightFunctionTest "" "Common" )
 elx_add_test( BSplineInterpolationDerivativeWeightFunctionTest "" "Common" )
 elx_add_test( BSplineInterpolationSODerivativeWeightFunctionTest "" "Common" )
 elx_add_test( CompareCompositeTransformsTest "" "Common" )
-elx_add_test( MevisDicomTiffImageIOTest "" "Common" )
+if( ELASTIX_USE_MEVISDICOMTIFF )
+    elx_add_test( MevisDicomTiffImageIOTest "" "Common" )
+endif()
+
 elx_add_test( ThinPlateSplineTransformPerformanceTest "" "Common"
   ${TestDataDir}/parameters_TPSTransformTest.txt
   ${elastix_BINARY_DIR}/Testing )
