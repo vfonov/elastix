@@ -243,8 +243,8 @@ install( DIRECTORY ${elastix_SOURCE_DIR}/Common ${elastix_SOURCE_DIR}/Core ${ela
 install( FILES ${elastix_BINARY_DIR}/elxInstallComponentFunctionCalls.h
          ${elastix_BINARY_DIR}/elxInstallComponentFunctionDeclarations.h
          ${elastix_BINARY_DIR}/elxSupportedImageTypes.h
-         ${elastix_BINARY_DIR}/ITKIOFactoryRegistration/itkImageIOFactoryRegisterManager.h
-         ${elastix_BINARY_DIR}/ITKIOFactoryRegistration/itkTransformIOFactoryRegisterManager.h
+         ${elastix_BINARY_DIR}/ITKFactoryRegistration/itkImageIOFactoryRegisterManager.h
+         ${elastix_BINARY_DIR}/ITKFactoryRegistration/itkTransformIOFactoryRegisterManager.h
          DESTINATION ${ELASTIX_INCLUDE_DIR} )
 
 #---------------------------------------------------------------------
