@@ -458,7 +458,7 @@ protected:
   /** Methods for image sampler support **********/
 
   /** Initialize variables related to the image sampler; called by Initialize. */
-  virtual void InitializeImageSampler( void ) throw ( ExceptionObject );
+  virtual void InitializeImageSampler( void ) ;
 
   /** Inheriting classes can specify whether they use the image sampler functionality
    * Make sure to set it before calling Initialize; default: false. */
