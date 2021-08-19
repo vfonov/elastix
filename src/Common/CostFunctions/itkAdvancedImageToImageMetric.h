@@ -257,7 +257,7 @@ public:
    * \li Check if a B-spline interpolator has been set
    * \li Check if an AdvancedTransform has been set
    */
-  virtual void Initialize( void ) throw ( ExceptionObject ) ITK_OVERRIDE;
+  virtual void Initialize( void )  ITK_OVERRIDE;
 
   /** Experimental feature: compute SelfHessian.
    * This base class just returns an identity matrix of the right size.

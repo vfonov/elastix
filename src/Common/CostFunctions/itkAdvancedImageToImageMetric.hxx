@@ -148,7 +148,7 @@ AdvancedImageToImageMetric< TFixedImage, TMovingImage >
 template< class TFixedImage, class TMovingImage >
 void
 AdvancedImageToImageMetric< TFixedImage, TMovingImage >
-::Initialize( void ) throw ( ExceptionObject )
+::Initialize( void ) 
 {
   /** Initialize transform, interpolator, etc. */
   Superclass::Initialize();
@@ -417,7 +417,7 @@ AdvancedImageToImageMetric< TFixedImage, TMovingImage >
 template< class TFixedImage, class TMovingImage >
 void
 AdvancedImageToImageMetric< TFixedImage, TMovingImage >
-::InitializeImageSampler( void ) throw ( ExceptionObject )
+::InitializeImageSampler( void ) 
 {
   if( this->GetUseImageSampler() )
   {
