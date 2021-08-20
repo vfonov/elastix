@@ -145,7 +145,7 @@ namespace elastix
     /** Sets up a timer to measure the initialisation time and
      * calls the Superclass' implementation.
      */
-    virtual void Initialize(void) throw (itk::ExceptionObject);
+    virtual void Initialize(void) ;
 
     /**
      * Do some things before each resolution:
